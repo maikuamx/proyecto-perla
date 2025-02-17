@@ -22,32 +22,141 @@
     <title>Document</title>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-left">
-          <button class="menu-toggle">
+  <nav class="navbar">
+    <div class="nav-left">
+        <button class="menu-toggle">
             <i class="fas fa-bars"></i>
-          </button>
-          <img class="logo" src="./assets/logo-black.png" alt="">
-          <ul class="nav-menu">
+        </button>
+        <a href="/" class="logo">Sapphirus</a>
+        <ul class="nav-menu">
             <li><a href="#home">Inicio</a></li>
-            <li><a href="#catalog">Catalogo</a></li>
-            <li><a href="#faqs">FAQs</a></li>
-          </ul>
-        </div>
-        
-        <div class="nav-right">
-          <div class="search-container">
+            <li><a href="#catalog">Catálogo</a></li>
+            <li><a href="#contact">Contacto</a></li>
+        </ul>
+    </div>
+    
+    <div class="nav-right">
+        <div class="search-container">
             <i class="fas fa-search"></i>
-            <input type="text" placeholder="Search..." />
-          </div>
-          <div class="nav-icons">
+            <input type="text" placeholder="Buscar productos...">
+        </div>
+        <div class="nav-icons">
             <a href="/account"><i class="fas fa-user"></i></a>
             <a href="/cart"><i class="fas fa-shopping-bag"></i></a>
-          </div>
         </div>
-      </nav>
-      <div id="app"></div>
-      <script type="module" src="/main.js"></script>
-    
+    </div>
+</nav>
+
+<main>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Bienvenido a Sapphirus</h1>
+            <p>Tu tienda de productos americanos en España</p>
+            <a href="#catalog" class="cta-button">Ver Catálogo</a>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about" id="about">
+        <div class="container">
+            <h2>Sobre Nosotros</h2>
+            <div class="about-grid">
+                <div class="about-card">
+                    <i class="fas fa-shipping-fast"></i>
+                    <h3>Envío Rápido</h3>
+                    <p>Entrega directa desde Estados Unidos</p>
+                </div>
+                <div class="about-card">
+                    <i class="fas fa-check-circle"></i>
+                    <h3>Productos Originales</h3>
+                    <p>100% auténticos y garantizados</p>
+                </div>
+                <div class="about-card">
+                    <i class="fas fa-headset"></i>
+                    <h3>Atención 24/7</h3>
+                    <p>Soporte personalizado</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories Section -->
+    <section class="categories" id="catalog">
+        <div class="container">
+            <h2>Nuestro Catálogo</h2>
+            <div class="products-grid">
+                <!-- Products will be loaded dynamically -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact" id="contact">
+        <div class="container">
+            <div class="contact-wrapper">
+                <h2 class="contact-heading">Empecemos algo juntos</h2>
+                <p class="contact-text">¿Tienes alguna pregunta sobre nuestros productos o necesitas ayuda con tu pedido? Estamos aquí para ayudarte.</p>
+                
+                <form class="contact-form">
+                    <div class="input-group">
+                        <input type="text" id="name" required placeholder=" ">
+                        <label for="name">Mi nombre es</label>
+                    </div>
+                    
+                    <div class="input-group">
+                        <input type="text" id="interest" required placeholder=" ">
+                        <label for="interest">Me interesa</label>
+                    </div>
+                    
+                    <div class="input-group">
+                        <input type="email" id="email" required placeholder=" ">
+                        <label for="email">Me puedes contactar en</label>
+                    </div>
+                    
+                    <div class="input-group">
+                        <textarea id="message" required placeholder=" "></textarea>
+                        <label for="message">Tu mensaje</label>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">Enviar mensaje</button>
+                </form>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="footer">
+    <div class="container">
+        <div class="footer-grid">
+            <div class="footer-section">
+                <h3>Sapphirus</h3>
+                <p>Tu tienda de confianza para productos americanos de alta calidad.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Enlaces Rápidos</h3>
+                <ul>
+                    <li><a href="#home">Inicio</a></li>
+                    <li><a href="#catalog">Catálogo</a></li>
+                    <li><a href="#about">Sobre Nosotros</a></li>
+                    <li><a href="#contact">Contacto</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Síguenos</h3>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Sapphirus. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</footer>
+
+<script type="module" src="/main.js"></script>
 </body>
 </html>
