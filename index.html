@@ -3,23 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <!-- Favicon principal -->
-        <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32x32.png">
-        <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon/favicon-16x16.png">
-        <link rel="icon" type="image/x-icon" href="assets/favicon/favicon.ico">
+    <!-- Favicon principal -->
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon/favicon-16x16.png">
+    <link rel="icon" type="image/x-icon" href="assets/favicon/favicon.ico">
 
-        <!-- Apple Touch Icon -->
-        <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon/apple-touch-icon.png">
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon/apple-touch-icon.png">
 
-        <!-- Iconos para Android Chrome -->
-        <link rel="icon" type="image/png" sizes="192x192" href="assets/favicon/android-chrome-192x192.png">
-        <link rel="icon" type="image/png" sizes="512x512" href="assets/favicon/android-chrome-512x512.png">
+    <!-- Iconos para Android Chrome -->
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/favicon/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="assets/favicon/android-chrome-512x512.png">
 
     <!-- Web App Manifest -->
     <link rel="manifest" href="assets/favicon/site.webmanifest">
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <title>Document</title>
 </head>
 <body>
+    <nav class="navbar">
+        <div class="nav-left">
+          <button class="menu-toggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <a href="/" class="logo">Sapphirus</a>
+          <ul class="nav-menu">
+            <li><a href="#home">Inicio</a></li>
+            <li><a href="#catalog">Catalogo</a></li>
+            <li><a href="#faqs">FAQs</a></li>
+          </ul>
+        </div>
+        
+        <div class="nav-right">
+          <div class="search-container">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Search..." />
+          </div>
+          <div class="nav-icons">
+            <a href="/account"><i class="fas fa-user"></i></a>
+            <a href="/cart"><i class="fas fa-shopping-bag"></i></a>
+          </div>
+        </div>
+      </nav>
+      <div id="app"></div>
+      <script type="module" src="/main.js"></script>
     
 </body>
 </html>
