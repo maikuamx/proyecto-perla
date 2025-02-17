@@ -40,14 +40,12 @@
     cursor: pointer;
     color: #213547;
   }
-  
-  .logo {
-    font-size: 1.5rem;
-    font-weight: 600;
-    text-decoration: none;
-    color: #213547;
+    
+  .logo{
+    max-width: 20%;
+    max-height: 50%;
   }
-  
+
   .nav-menu {
     display: flex;
     list-style: none;
@@ -62,7 +60,7 @@
   }
   
   .nav-menu a:hover {
-    color: #142C2E;
+    color: #646cff;
   }
   
   .search-container {
