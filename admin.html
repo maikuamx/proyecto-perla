@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - Sapphirus</title>
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <!-- Favicon principal -->
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon/favicon-16x16.png">
+    <link rel="icon" type="image/x-icon" href="assets/favicon/favicon.ico">
+    
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon/apple-touch-icon.png">
+    
+    <!-- Iconos para Android Chrome -->
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/favicon/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="assets/favicon/android-chrome-512x512.png">
+    
+     <!-- Web App Manifest -->
+    <link rel="manifest" href="assets/favicon/site.webmanifest">
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+<body>
+    <div class="admin-container">
+        <nav class="admin-nav">
+            <div class="admin-nav-header">
+                <h1>Sapphirus Admin</h1>
+            </div>
+            <ul class="admin-menu">
+                <li><a href="#dashboard" class="active"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+                <li><a href="#products"><i class="fas fa-box"></i> Productos</a></li>
+                <li><a href="#orders"><i class="fas fa-shopping-cart"></i> Pedidos</a></li>
+                <li><a href="#users"><i class="fas fa-users"></i> Usuarios</a></li>
+                <li><a href="/" class="back-to-site"><i class="fas fa-arrow-left"></i> Volver al sitio</a></li>
+            </ul>
+        </nav>
+
+        <main class="admin-content">
+            <header class="admin-header">
+                <h2>Dashboard</h2>
+                <div class="admin-user">
+                    <span>Admin</span>
+                    <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i></button>
+                </div>
+            </header>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Usuarios Totales</h3>
+                    <p id="userCount">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Ingresos Totales</h3>
+                    <p id="totalRevenue">$0.00</p>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="revenueChart"></canvas>
+            </div>
+
+            <section class="products-section">
+                <h2>Agregar Nuevo Producto</h2>
+                <form id="addProductForm" class="admin-form">
+                    <div class="form-group">
+                        <label for="name">Nombre del Producto</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Descripción</label>
+                        <textarea id="description" name="description" required></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="price">Precio</label>
+                            <input type="number" id="price" name="price" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="original_price">Precio Original</label>
+                            <input type="number" id="original_price" name="original_price" step="0.01" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="category">Categoría</label>
+                        <select id="category" name="category" required>
+                            <option value="accessories">Accesorios</option>
+                            <option value="shoes">Zapatos</option>
+                            <option value="clothing">Ropa</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="image_url">URL de la Imagen</label>
+                        <input type="url" id="image_url" name="image_url" required>
+                    </div>
+                    <button type="submit" class="admin-btn">Agregar Producto</button>
+                </form>
+
+                <h2>Productos Actuales</h2>
+                <div id="productsList" class="products-grid admin-products"></div>
+            </section>
+        </main>
+    </div>
+
+    <script type="module" src="/src/js/admin.js"></script>
+</body>
+</html>
