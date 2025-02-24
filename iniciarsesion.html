@@ -19,40 +19,102 @@
     <link rel="manifest" href="assets/favicon/site.webmanifest">
     <link rel="stylesheet" href="./styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-    <title>Iniciar Sesión - Sapphirus</title>
+    
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <title>Cuenta - Sapphirus</title>
 </head>
-<body>
-    <nav class="navbar">
-        <div class="nav-left">
-            <a href="/" class="logo">Sapphirus</a>
-        </div>
-    </nav>
-
+<body class="auth-page">
     <div class="auth-container">
         <div class="auth-card">
-            <h1>Iniciar Sesión</h1>
-            <form id="loginForm" class="auth-form">
-                <div class="input-group">
-                    <input type="email" id="email" required placeholder=" ">
-                    <label for="email">Correo electrónico</label>
+            <div class="auth-sections">
+                <div class="auth-image">
+                    <div class="auth-image-content">
+                        <h2>Sapphirus</h2>
+                        <p>Tu tienda de productos americanos en Chihuahua</p>
+                    </div>
                 </div>
+                <div class="auth-forms">
+                    <a href="/" class="back-to-site">
+                        <i class="fas fa-arrow-left"></i>
+                        Volver al sitio
+                    </a>
+                    
+                    <div id="loginForm" class="auth-form-container active">
+                        <h1>Iniciar Sesión</h1>
+                        <p class="auth-subtitle">¿No tienes una cuenta? <a href="#" class="switch-form" data-form="register">Regístrate</a></p>
+                        
+                        <form class="auth-form">
+                            <div class="input-group">
+                                <input type="email" id="loginEmail" required placeholder=" ">
+                                <label for="loginEmail">Correo electrónico</label>
+                            </div>
 
-                <div class="input-group">
-                    <input type="password" id="password" required placeholder=" ">
-                    <label for="password">Contraseña</label>
-                </div>
+                            <div class="input-group">
+                                <input type="password" id="loginPassword" required placeholder=" ">
+                                <label for="loginPassword">Contraseña</label>
+                                <button type="button" class="toggle-password">
+                                    <i class="far fa-eye"></i>
+                                </button>
+                            </div>
 
-                <button type="submit" class="auth-btn">
-                    Iniciar Sesión
-                    <i class="fas fa-arrow-right"></i>
-                </button>
-            </form>
+                            <div class="form-options">
+                                <label class="remember-me">
+                                    <input type="checkbox">
+                                    <span>Recordarme</span>
+                                </label>
+                                <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
+                            </div>
 
-            <div class="auth-links">
-                <a href="/recuperar-password" class="forgot-password">¿Olvidaste tu contraseña?</a>
-                <div class="register-link">
-                    ¿Aún no tienes una cuenta? 
-                    <a href="/registro">Regístrate ahora</a>
+                            <button type="submit" class="auth-btn">
+                                Iniciar Sesión
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </form>
+                    </div>
+
+                    <div id="registerForm" class="auth-form-container">
+                        <h1>Crear cuenta</h1>
+                        <p class="auth-subtitle">¿Ya tienes una cuenta? <a href="#" class="switch-form" data-form="login">Inicia sesión</a></p>
+                        
+                        <form class="auth-form">
+                            <div class="form-row">
+                                <div class="input-group">
+                                    <input type="text" id="firstName" required placeholder=" ">
+                                    <label for="firstName">Nombre</label>
+                                </div>
+                                <div class="input-group">
+                                    <input type="text" id="lastName" required placeholder=" ">
+                                    <label for="lastName">Apellido</label>
+                                </div>
+                            </div>
+
+                            <div class="input-group">
+                                <input type="email" id="registerEmail" required placeholder=" ">
+                                <label for="registerEmail">Correo electrónico</label>
+                            </div>
+
+                            <div class="input-group">
+                                <input type="password" id="registerPassword" required placeholder=" ">
+                                <label for="registerPassword">Contraseña</label>
+                                <button type="button" class="toggle-password">
+                                    <i class="far fa-eye"></i>
+                                </button>
+                            </div>
+
+                            <div class="terms-check">
+                                <label>
+                                    <input type="checkbox" required>
+                                    <span>Acepto los <a href="#">Términos y Condiciones</a></span>
+                                </label>
+                            </div>
+
+                            <button type="submit" class="auth-btn">
+                                Crear cuenta
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
