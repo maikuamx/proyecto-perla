@@ -1,4 +1,4 @@
-// import { signIn, signUp } from './supabase';
+import { signIn, signUp, signOut } from './supabase';
 
 document.addEventListener('DOMContentLoaded', () => {
     // Switch between login and register forms
@@ -48,19 +48,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const email = document.getElementById('loginEmail').value;
         const password = document.getElementById('loginPassword').value;
         
-        const { data, error } = await signIn(email, password);
-        
-        if (error) {
+        try {
+            const { data, error } = await signIn(email, password);
+            
+            if (error) throw error;
+            
+            // Redirigir según el rol del usuario
+            if (data.user.role === 'admin') {
+                window.location.href = '/admin.html';
+            } else {
+                window.location.href = '/';
+            }
+        } catch (error) {
             alert('Error al iniciar sesión: ' + error.message);
-            return;
-        }
-        
-        // Redirigir según el rol del usuario
-        const { user } = data;
-        if (user.role === 'admin') {
-            window.location.href = '/admin.html';
-        } else {
-            window.location.href = '/';
         }
     });
 
@@ -74,16 +74,31 @@ document.addEventListener('DOMContentLoaded', () => {
         const firstName = document.getElementById('firstName').value;
         const lastName = document.getElementById('lastName').value;
         
-        const { data, error } = await signUp(email, password);
-        
-        if (error) {
+        try {
+            const { error } = await signUp(email, password);
+            
+            if (error) throw error;
+            
+            // Mostrar mensaje de éxito y cambiar a formulario de login
+            alert('Registro exitoso. Por favor, inicia sesión.');
+            loginForm.classList.add('active');
+            registerForm.classList.remove('active');
+        } catch (error) {
             alert('Error al registrarse: ' + error.message);
-            return;
         }
-        
-        // Mostrar mensaje de éxito y cambiar a formulario de login
-        alert('Registro exitoso. Por favor, inicia sesión.');
-        loginForm.classList.add('active');
-        registerForm.classList.remove('active');
     });
+
+    // Handle logout
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                const { error } = await signOut();
+                if (error) throw error;
+                window.location.href = '/';
+            } catch (error) {
+                alert('Error al cerrar sesión: ' + error.message);
+            }
+        });
+    }
 });

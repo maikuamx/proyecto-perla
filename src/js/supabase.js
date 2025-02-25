@@ -1,7 +1,13 @@
-import { createClient } from '@supabase/supabase-js';
+import 'dotenv/config'
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+
+
+require('dotenv').config()
+
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseAnonKey = process.env.SECRET_KEY;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
@@ -10,6 +16,22 @@ export async function signUp(email, password) {
     email,
     password,
   });
+  
+  if (!error && data.user) {
+    // Crear entrada en la tabla users
+    const { error: userError } = await supabase
+      .from('users')
+      .insert([
+        { 
+          id: data.user.id,
+          email: email,
+          role: 'user'
+        }
+      ]);
+      
+    if (userError) return { error: userError };
+  }
+  
   return { data, error };
 }
 
@@ -18,6 +40,17 @@ export async function signIn(email, password) {
     email,
     password,
   });
+  
+  if (!error) {
+    const { data: userData } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', data.user.id)
+      .single();
+      
+    return { data: { ...data, user: { ...data.user, ...userData } }, error: null };
+  }
+  
   return { data, error };
 }
 
@@ -46,20 +79,20 @@ export async function isAdmin() {
 }
 
 export async function getStats() {
-  const { data: users } = await supabase
+  const { count: userCount } = await supabase
     .from('users')
-    .select('count');
+    .select('*', { count: 'exact', head: true });
     
-  const { data: totalRevenue } = await supabase
+  const { data: orders } = await supabase
     .from('orders')
     .select('total')
     .eq('status', 'completed');
     
-  const revenue = totalRevenue?.reduce((acc, order) => acc + order.total, 0) || 0;
+  const totalRevenue = orders?.reduce((sum, order) => sum + order.total, 0) || 0;
     
   return {
-    userCount: users?.[0]?.count || 0,
-    totalRevenue: revenue
+    userCount: userCount || 0,
+    totalRevenue
   };
 }
 
@@ -79,5 +112,48 @@ export async function getProducts() {
     .select('*')
     .order('created_at', { ascending: false });
     
+  return { data: data || [], error };
+}
+
+export async function updateProduct(id, updates) {
+  const { data, error } = await supabase
+    .from('products')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+    
   return { data, error };
+}
+
+export async function deleteProduct(id) {
+  const { error } = await supabase
+    .from('products')
+    .delete()
+    .eq('id', id);
+    
+  return { error };
+}
+
+// Order functions
+export async function createOrder(orderData) {
+  const { data, error } = await supabase
+    .from('orders')
+    .insert([{
+      ...orderData,
+      user_id: (await supabase.auth.getUser()).data.user?.id
+    }])
+    .select()
+    .single();
+    
+  return { data, error };
+}
+
+export async function getUserOrders() {
+  const { data, error } = await supabase
+    .from('orders')
+    .select('*')
+    .order('created_at', { ascending: false });
+    
+  return { data: data || [], error };
 }
