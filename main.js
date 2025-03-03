@@ -13,10 +13,6 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// Category tabs functionality
-const tabButtons = document.querySelectorAll('.tab-btn');
-const productsGrid = document.querySelector('.products-grid');
-
 // Sample product data
 const products = [
     {
@@ -50,6 +46,22 @@ const products = [
         price: 199.00,
         category: "shoes",
         image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
+    },
+    {
+        id: 5,
+        name: "Vestido Elegante Noche",
+        originalPrice: 120.00,
+        price: 89.99,
+        category: "clothing",
+        image: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
+    },
+    {
+        id: 6,
+        name: "Chaqueta Casual Otoño",
+        originalPrice: 180.00,
+        price: 129.99,
+        category: "clothing",
+        image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
     }
 ];
 
@@ -74,29 +86,9 @@ function createProductCard(product) {
     `;
 }
 
-// Function to filter products by category
-function filterProducts(category) {
-    const filteredProducts = category === 'all' 
-        ? products 
-        : products.filter(product => product.category === category);
-    
-    productsGrid.innerHTML = filteredProducts.map(createProductCard).join('');
-}
-
-// Add click event listeners to tab buttons
-tabButtons.forEach(button => {
-    button.addEventListener('click', () => {
-        // Remove active class from all buttons
-        tabButtons.forEach(btn => btn.classList.remove('active'));
-        // Add active class to clicked button
-        button.classList.add('active');
-        // Filter products
-        filterProducts(button.dataset.category);
-    });
-});
-
 // Initialize with all products
-filterProducts('all');
+const productsGrid = document.querySelector('.products-grid');
+productsGrid.innerHTML = products.map(createProductCard).join('');
 
 // Contact form handling with modern animations
 const inputs = document.querySelectorAll('.input-group input, .input-group textarea');
