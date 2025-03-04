@@ -1,17 +1,11 @@
-import 'dotenv/config'
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+import { createClient } from '@supabase/supabase-js';
 
-
-
-
-require('dotenv').config()
-
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseAnonKey = process.env.SECRET_KEY;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-export async function signUp(email, password) {
+export async function signUp(email, password, firstName, lastName) {
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -25,6 +19,8 @@ export async function signUp(email, password) {
         { 
           id: data.user.id,
           email: email,
+          first_name: firstName,
+          last_name: lastName,
           role: 'user'
         }
       ]);
@@ -85,14 +81,20 @@ export async function getStats() {
     
   const { data: orders } = await supabase
     .from('orders')
-    .select('total')
-    .eq('status', 'completed');
+    .select('total, status');
     
-  const totalRevenue = orders?.reduce((sum, order) => sum + order.total, 0) || 0;
+  const completedOrders = orders?.filter(order => order.status === 'completed') || [];
+  const totalRevenue = completedOrders.reduce((sum, order) => sum + order.total, 0);
+  
+  const { count: productCount } = await supabase
+    .from('products')
+    .select('*', { count: 'exact', head: true });
     
   return {
     userCount: userCount || 0,
-    totalRevenue
+    totalRevenue: totalRevenue || 0,
+    completedOrders: completedOrders.length,
+    activeProducts: productCount || 0
   };
 }
 
@@ -100,8 +102,7 @@ export async function addProduct(productData) {
   const { data, error } = await supabase
     .from('products')
     .insert([productData])
-    .select()
-    .single();
+    .select();
     
   return { data, error };
 }
@@ -120,8 +121,7 @@ export async function updateProduct(id, updates) {
     .from('products')
     .update(updates)
     .eq('id', id)
-    .select()
-    .single();
+    .select();
     
   return { data, error };
 }
@@ -143,8 +143,7 @@ export async function createOrder(orderData) {
       ...orderData,
       user_id: (await supabase.auth.getUser()).data.user?.id
     }])
-    .select()
-    .single();
+    .select();
     
   return { data, error };
 }

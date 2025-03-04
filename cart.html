@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <title>Carrito de Compras - Sapphirus</title>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-left">
+            <button class="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <img src="./assets/logo-black.png" class="logo">
+            <ul class="nav-menu">
+                <li><a href="/">Inicio</a></li>
+                <li><a href="/#catalog">Catálogo</a></li>
+                <li><a href="/#contact">Contacto</a></li>
+                <li><a href="/#FAQs">Preguntas frecuentes</a></li>
+            </ul>
+        </div>
+        
+        <div class="nav-right">
+            <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Buscar productos...">
+            </div>
+            <div class="nav-icons">
+                <a href="/iniciarsesion.html"><i class="fas fa-user"></i></a>
+                <a href="/cart.html" class="active"><i class="fas fa-shopping-bag"></i><span class="cart-count" id="cartCount">0</span></a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="cart-page">
+        <div class="container">
+            <div class="cart-container">
+                <div class="cart-header">
+                    <h1>Tu Carrito</h1>
+                    <a href="/" class="continue-shopping-link">Seguir comprando</a>
+                </div>
+
+                <div id="cartItems" class="cart-items">
+                    <!-- Cart items will be loaded dynamically -->
+                </div>
+
+                <div id="cartEmpty" class="empty-cart" style="display: none;">
+                    <i class="fas fa-shopping-cart"></i>
+                    <h2>Tu carrito está vacío</h2>
+                    <p>Parece que aún no has añadido productos a tu carrito.</p>
+                    <a href="/#catalog" class="continue-shopping">Explorar productos</a>
+                </div>
+
+                <div id="cartSummary" class="cart-summary">
+                    <h2>Resumen del Pedido</h2>
+                    <div class="summary-row">
+                        <span>Subtotal</span>
+                        <span id="subtotal">€0.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Envío</span>
+                        <span id="shipping">€0.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Impuestos</span>
+                        <span id="taxes">€0.00</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total</span>
+                        <span id="total">€0.00</span>
+                    </div>
+                    <button id="checkoutBtn" class="checkout-btn">
+                        Proceder al pago
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h3>Sapphirus</h3>
+                    <p>Tu tienda de confianza para productos americanos de alta calidad.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Enlaces Rápidos</h3>
+                    <ul>
+                        <li><a href="/">Inicio</a></li>
+                        <li><a href="/#catalog">Catálogo</a></li>
+                        <li><a href="/#about">Sobre Nosotros</a></li>
+                        <li><a href="/#contact">Contacto</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Síguenos</h3>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Sapphirus. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module" src="/src/js/cart.js"></script>
+</body>
+</html>
