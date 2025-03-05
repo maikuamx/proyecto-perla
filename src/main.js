@@ -1,212 +1,157 @@
-// Toggle mobile menu
-const menuToggle = document.querySelector('.menu-toggle');
-const navMenu = document.querySelector('.nav-menu');
+import { getProducts, getProductsByCategory } from './supabase.js';
 
-menuToggle.addEventListener('click', () => {
-    navMenu.classList.toggle('active');
-});
-
-// Close mobile menu when clicking outside
-document.addEventListener('click', (e) => {
-    if (!e.target.closest('.nav-left') && navMenu.classList.contains('active')) {
-        navMenu.classList.remove('active');
+// Initialize catalog
+async function initializeCatalog() {
+    const catalogGrid = document.querySelector('.catalog-grid');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const sortFilter = document.getElementById('sortFilter');
+    
+    try {
+        // Initial load of all products
+        const products = await getProducts();
+        renderProducts(products);
+        
+        // Filter products by category
+        categoryFilter.addEventListener('change', async () => {
+            const selectedCategory = categoryFilter.value;
+            try {
+                const products = selectedCategory
+                    ? await getProductsByCategory(selectedCategory)
+                    : await getProducts();
+                renderProducts(products);
+            } catch (error) {
+                console.error('Error filtering products:', error);
+                showError('Error al filtrar productos');
+            }
+        });
+        
+        // Sort products
+        sortFilter.addEventListener('change', async () => {
+            const sortValue = sortFilter.value;
+            try {
+                let products = await getProducts();
+                
+                switch(sortValue) {
+                    case 'price-asc':
+                        products.sort((a, b) => a.price - b.price);
+                        break;
+                    case 'price-desc':
+                        products.sort((a, b) => b.price - a.price);
+                        break;
+                    case 'newest':
+                        products.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                        break;
+                }
+                
+                renderProducts(products);
+            } catch (error) {
+                console.error('Error sorting products:', error);
+                showError('Error al ordenar productos');
+            }
+        });
+    } catch (error) {
+        console.error('Error loading products:', error);
+        showError('Error al cargar productos');
     }
-});
+}
 
-// Sample product data
-const products = [
-    {
-        id: 1,
-        name: "Reloj Bold Chronograph",
-        originalPrice: 450.00,
-        price: 299.99,
-        category: "accessories",
-        image: "https://images.unsplash.com/photo-1524592094714-0f0654e20314?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-    },
-    {
-        id: 2,
-        name: "Smartwatch Motion Plus",
-        originalPrice: 199.99,
-        price: 99.99,
-        category: "accessories",
-        image: "https://images.unsplash.com/photo-1546868871-7041f2a55e12?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-    },
-    {
-        id: 3,
-        name: "Bolso Leather Premium",
-        originalPrice: 29.90,
-        price: 19.90,
-        category: "accessories",
-        image: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-    },
-    {
-        id: 4,
-        name: "Zapatillas Urban Sport",
-        originalPrice: 390.00,
-        price: 199.00,
-        category: "shoes",
-        image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-    },
-    {
-        id: 5,
-        name: "Vestido Elegante Noche",
-        originalPrice: 120.00,
-        price: 89.99,
-        category: "clothing",
-        image: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-    },
-    {
-        id: 6,
-        name: "Chaqueta Casual Otoño",
-        originalPrice: 180.00,
-        price: 129.99,
-        category: "clothing",
-        image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
+function renderProducts(products) {
+    const catalogGrid = document.querySelector('.catalog-grid');
+    
+    if (!products.length) {
+        catalogGrid.innerHTML = '<p class="no-products">No hay productos disponibles.</p>';
+        return;
     }
-];
+    
+    catalogGrid.innerHTML = products.map(product => createProductCard(product)).join('');
+    
+    // Add event listeners for quick view and add to cart
+    setupProductInteractions();
+}
 
-// Function to create product cards
 function createProductCard(product) {
-    const discount = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
+    const discount = product.original_price 
+        ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
+        : 0;
     
     return `
         <div class="product-card">
-            <img src="${product.image}" alt="${product.name}">
-            <h3>${product.name}</h3>
-            <div class="price-container">
-                <span class="original-price">€${product.originalPrice.toFixed(2)}</span>
-                <span class="discounted-price">€${product.price.toFixed(2)}</span>
+            ${product.badge ? `<span class="product-badge">${product.badge}</span>` : ''}
+            <img src="${product.image_url}" alt="${product.name}" class="product-image">
+            <div class="product-details">
+                <div class="product-category">${product.category}</div>
+                <h3 class="product-title">${product.name}</h3>
+                <div class="product-price-container">
+                    <span class="product-price">€${product.price.toFixed(2)}</span>
+                    ${product.original_price ? `
+                        <span class="product-original-price">€${product.original_price.toFixed(2)}</span>
+                        <span class="product-discount">-${discount}%</span>
+                    ` : ''}
+                </div>
+                <div class="product-actions">
+                    <button class="add-to-cart" data-id="${product.id}">
+                        <i class="fas fa-shopping-cart"></i>
+                        Añadir al carrito
+                    </button>
+                    <button class="quick-view" title="Vista rápida" data-image="${product.image_url}">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
             </div>
-            <button class="add-to-cart" data-id="${product.id}">Añadir al carrito</button>
-            <a href="#" class="shop-now">
-                Ver detalles
-                <i class="fas fa-arrow-right"></i>
-            </a>
         </div>
     `;
 }
 
-// Initialize with all products
-const productsGrid = document.querySelector('.products-grid');
-if (productsGrid) {
-    productsGrid.innerHTML = products.map(createProductCard).join('');
-}
-
-// Initialize featured products
-const featuredProductsGrid = document.querySelector('.featured-products-grid');
-if (featuredProductsGrid) {
-    // Select 3 random products for featured section
-    const featuredProducts = [...products].sort(() => 0.5 - Math.random()).slice(0, 3);
-    featuredProductsGrid.innerHTML = featuredProducts.map(createProductCard).join('');
-}
-
-// Contact form handling with modern animations
-const inputs = document.querySelectorAll('.input-group input, .input-group textarea');
-
-inputs.forEach(input => {
-    // Add animation class when input is focused
-    input.addEventListener('focus', () => {
-        input.parentElement.classList.add('focused');
-    });
-
-    // Remove animation class when input loses focus and is empty
-    input.addEventListener('blur', () => {
-        if (input.value === '') {
-            input.parentElement.classList.remove('focused');
-        }
-    });
-
-    // Check initial state for pre-filled inputs
-    if (input.value !== '') {
-        input.parentElement.classList.add('focused');
-    }
-});
-
-// Enhanced form submission
-const contactForm = document.querySelector('.contact-form');
-
-if (contactForm) {
-    contactForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const formData = {
-            name: document.getElementById('name').value,
-            interest: document.getElementById('interest').value,
-            email: document.getElementById('email').value,
-            message: document.getElementById('message').value
-        };
-        
-        // Aquí normalmente enviarías los datos a tu backend
-        console.log('Datos del formulario:', formData);
-        
-        // Simular envío exitoso
-        const submitBtn = contactForm.querySelector('.submit-btn');
-        const originalText = submitBtn.textContent;
-        
-        submitBtn.textContent = 'Enviando...';
-        submitBtn.disabled = true;
-        
-        // Simular delay de red
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        submitBtn.textContent = '¡Mensaje enviado!';
-        
-        // Resetear formulario
-        setTimeout(() => {
-            contactForm.reset();
-            submitBtn.textContent = originalText;
-            submitBtn.disabled = false;
-            
-            // Remover clases 'focused' después de resetear
-            inputs.forEach(input => {
-                input.parentElement.classList.remove('focused');
-            });
-        }, 2000);
-    });
-}
-
-// Shopping Cart Functionality
-function initializeCart() {
-    // Get cart from localStorage or initialize empty cart
-    let cart = JSON.parse(localStorage.getItem('cart')) || [];
-    
-    // Update cart count in the header
-    updateCartCount(cart);
-    
-    // Add event listeners to "Add to Cart" buttons
-    const addToCartButtons = document.querySelectorAll('.add-to-cart');
-    addToCartButtons.forEach(button => {
+function setupProductInteractions() {
+    // Quick view functionality
+    document.querySelectorAll('.quick-view').forEach(button => {
         button.addEventListener('click', () => {
-            const productId = parseInt(button.getAttribute('data-id'));
-            const product = products.find(p => p.id === productId);
-            
-            if (product) {
-                // Check if product is already in cart
-                const existingItem = cart.find(item => item.id === productId);
-                
-                if (existingItem) {
-                    existingItem.quantity += 1;
-                } else {
-                    cart.push({
-                        id: product.id,
-                        name: product.name,
-                        price: product.price,
-                        image: product.image,
-                        quantity: 1
-                    });
-                }
-                
-                // Save updated cart to localStorage
-                localStorage.setItem('cart', JSON.stringify(cart));
-                
-                // Update cart count
-                updateCartCount(cart);
-                
-                // Show success message
-                showAddToCartSuccess(product.name);
-            }
+            const imageUrl = button.dataset.image;
+            showImagePreview(imageUrl);
         });
     });
+    
+    // Add to cart functionality
+    document.querySelectorAll('.add-to-cart').forEach(button => {
+        button.addEventListener('click', () => {
+            const productId = button.dataset.id;
+            addToCart(productId);
+        });
+    });
+}
+
+async function addToCart(productId) {
+    try {
+        const products = await getProducts();
+        const product = products.find(p => p.id === productId);
+        
+        if (!product) {
+            throw new Error('Producto no encontrado');
+        }
+        
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const existingItem = cart.find(item => item.id === productId);
+        
+        if (existingItem) {
+            existingItem.quantity += 1;
+        } else {
+            cart.push({
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                image: product.image_url,
+                quantity: 1
+            });
+        }
+        
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartCount(cart);
+        showAddToCartSuccess(product.name);
+        
+    } catch (error) {
+        console.error('Error adding to cart:', error);
+        showError('Error al añadir al carrito');
+    }
 }
 
 function updateCartCount(cart) {
@@ -214,18 +159,11 @@ function updateCartCount(cart) {
     if (cartCount) {
         const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
         cartCount.textContent = totalItems;
-        
-        // Show/hide the count badge
-        if (totalItems > 0) {
-            cartCount.style.display = 'flex';
-        } else {
-            cartCount.style.display = 'none';
-        }
+        cartCount.style.display = totalItems > 0 ? 'flex' : 'none';
     }
 }
 
 function showAddToCartSuccess(productName) {
-    // Create toast notification
     const toast = document.createElement('div');
     toast.className = 'toast-notification';
     toast.innerHTML = `
@@ -236,85 +174,88 @@ function showAddToCartSuccess(productName) {
         <button class="toast-close"><i class="fas fa-times"></i></button>
     `;
     
-    // Add to document
     document.body.appendChild(toast);
     
-    // Show toast
-    setTimeout(() => {
-        toast.classList.add('show');
-    }, 100);
+    setTimeout(() => toast.classList.add('show'), 100);
     
-    // Auto-hide after 3 seconds
     setTimeout(() => {
         toast.classList.remove('show');
-        setTimeout(() => {
-            document.body.removeChild(toast);
-        }, 300);
+        setTimeout(() => document.body.removeChild(toast), 300);
     }, 3000);
     
-    // Close button functionality
-    const closeBtn = toast.querySelector('.toast-close');
-    closeBtn.addEventListener('click', () => {
+    toast.querySelector('.toast-close').addEventListener('click', () => {
         toast.classList.remove('show');
-        setTimeout(() => {
-            document.body.removeChild(toast);
-        }, 300);
+        setTimeout(() => document.body.removeChild(toast), 300);
     });
 }
 
-// Smooth scroll for navigation links
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-            target.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
-            });
-            // Close mobile menu if open
-            navMenu.classList.remove('active');
+function showError(message) {
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification error';
+    toast.innerHTML = `
+        <i class="fas fa-exclamation-circle"></i>
+        <div class="toast-content">
+            <p>${message}</p>
+        </div>
+        <button class="toast-close"><i class="fas fa-times"></i></button>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => toast.classList.add('show'), 100);
+    
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => document.body.removeChild(toast), 300);
+    }, 3000);
+    
+    toast.querySelector('.toast-close').addEventListener('click', () => {
+        toast.classList.remove('show');
+        setTimeout(() => document.body.removeChild(toast), 300);
+    });
+}
+
+// Image preview functionality
+function createImagePreviewModal() {
+    const modal = document.createElement('div');
+    modal.className = 'image-preview-modal';
+    modal.innerHTML = `
+        <div class="preview-content">
+            <img class="preview-image" src="" alt="Preview">
+            <button class="close-preview">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeImagePreview();
         }
     });
-});
+    
+    modal.querySelector('.close-preview').addEventListener('click', closeImagePreview);
+    
+    return modal;
+}
 
-// Initialize cart functionality
-initializeCart();
+function showImagePreview(imageUrl) {
+    const modal = document.querySelector('.image-preview-modal') || createImagePreviewModal();
+    const previewImage = modal.querySelector('.preview-image');
+    previewImage.src = imageUrl;
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
 
-// FAQs functionality
-document.addEventListener('DOMContentLoaded', () => {
-    const faqCards = document.querySelectorAll('.faq-card');
+function closeImagePreview() {
+    const modal = document.querySelector('.image-preview-modal');
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+}
 
-    faqCards.forEach(card => {
-        const header = card.querySelector('.faq-header');
-        const content = card.querySelector('.faq-content');
-        const toggle = card.querySelector('.faq-toggle');
-
-        header.addEventListener('click', () => {
-            // Close all other cards
-            faqCards.forEach(otherCard => {
-                if (otherCard !== card && otherCard.classList.contains('active')) {
-                    otherCard.classList.remove('active');
-                    // Reset icon for other cards
-                    const otherToggle = otherCard.querySelector('.faq-toggle i');
-                    otherToggle.className = 'fas fa-plus';
-                    // Reset height
-                    otherCard.querySelector('.faq-content').style.height = '0';
-                }
-            });
-
-            // Toggle current card
-            card.classList.toggle('active');
-            
-            // Toggle icon
-            const icon = toggle.querySelector('i');
-            if (card.classList.contains('active')) {
-                icon.className = 'fas fa-minus';
-                content.style.height = content.scrollHeight + 'px';
-            } else {
-                icon.className = 'fas fa-plus';
-                content.style.height = '0';
-            }
-        });
-    });
-});
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', initializeCatalog);

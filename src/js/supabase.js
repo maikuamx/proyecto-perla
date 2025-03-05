@@ -1,13 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Initialize Supabase client
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseAnonKey = process.env.SUPABASE_PUBLIC;
+const supabaseUrl = 'https://rxjquziaipslqtmgqeoz.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4anF1emlhaXBzbHF0bWdxZW96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA0MjQzMTEsImV4cCI6MjA1NjAwMDMxMX0.iu4ovJ2QumGBROQOnbljQ9kPSirYvfgYiEukxJrHD3Q';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // API base URL
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'https://proyecto-perla.onrender.com/api';
 
 // Auth functions
 export async function signUp(email, password, firstName, lastName) {
