@@ -914,14 +914,14 @@ body {
 }
 
 
-/* Admin Panel Styles */
 .admin-container {
   display: grid;
   grid-template-columns: 280px 1fr;
   min-height: 100vh;
-  background-color: var(--gray-light);
+  background-color: var(--gray-100);
 }
 
+/* Sidebar Navigation */
 .admin-nav {
   background-color: var(--dark);
   color: var(--white);
@@ -929,228 +929,387 @@ body {
   height: 100vh;
   position: fixed;
   width: 280px;
+  overflow-y: auto;
 }
 
 .admin-nav-header {
-  padding: 0 1.5rem;
-  margin-bottom: 2.5rem;
+  padding: 0 2rem;
+  margin-bottom: 3rem;
 }
 
 .admin-nav-header h1 {
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   color: var(--white);
+  font-weight: 600;
 }
 
 .admin-menu {
   list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.admin-menu li {
+  padding: 0.375rem 1.5rem;
 }
 
 .admin-menu a {
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1rem 1.5rem;
-  color: var(--gray-medium);
+  padding: 0.875rem 1.25rem;
+  color: var(--gray-400);
   text-decoration: none;
   transition: var(--transition);
-  border-left: 3px solid transparent;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
 }
 
 .admin-menu a:hover,
 .admin-menu a.active {
   background-color: rgba(255, 255, 255, 0.1);
-  border-left-color: var(--blue-gray);
   color: var(--white);
+}
+
+.admin-menu a.active {
+  background-color: var(--primary-color);
 }
 
 .admin-menu i {
   width: 20px;
+  text-align: center;
+  font-size: 1.25rem;
 }
 
 .back-to-site {
-  margin-top: 2rem;
+  margin: 2rem 1.5rem 0;
+  padding-top: 1.5rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* Main Content Area */
 .admin-content {
   margin-left: 280px;
-  padding: 2.5rem;
+  padding: 2rem 2.5rem;
 }
 
+/* Header */
 .admin-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2.5rem;
   background-color: var(--white);
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  padding: 1.5rem 2rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
 }
 
-.admin-header h2 {
-  color: var(--dark);
-  font-size: 1.8rem;
+.header-left h2 {
+  font-size: 1.75rem;
+  color: var(--gray-900);
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.header-left .date {
+  color: var(--gray-600);
+  font-size: 0.875rem;
 }
 
 .admin-user {
   display: flex;
   align-items: center;
-  gap: 1rem;
-}
-
-.admin-user span {
-  color: var(--text-color);
-  font-weight: 600;
-}
-
-.admin-user button {
-  background: none;
-  border: none;
-  color: var(--text-light);
-  cursor: pointer;
+  gap: 1.5rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--gray-100);
+  border-radius: var(--radius-full);
   transition: var(--transition);
-  font-size: 1.2rem;
-  padding: 0.5rem;
-  border-radius: 50%;
 }
 
-.admin-user button:hover {
-  color: var(--blue-gray);
-  background-color: var(--gray-light);
-  transform: rotate(180deg);
+.admin-user:hover {
+  background-color: var(--gray-200);
 }
 
+.user-info {
+  text-align: right;
+}
+
+.user-name {
+  color: var(--gray-900);
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.user-role {
+  color: var(--gray-600);
+  font-size: 0.75rem;
+}
+
+/* Stats Grid */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 1.5rem;
   margin-bottom: 2.5rem;
 }
 
 .stat-card {
   background: var(--white);
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
   transition: var(--transition);
-  border-left: 4px solid var(--blue-gray);
 }
 
 .stat-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
 }
 
-.stat-card h3 {
-  color: var(--text-light);
-  font-size: 1rem;
-  margin-bottom: 0.8rem;
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background-color: var(--accent-color-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: var(--primary-color);
+  margin-bottom: 1.25rem;
 }
 
-.stat-card p {
-  color: var(--dark);
-  font-size: 2rem;
-  font-weight: 700;
+.stat-info h3 {
+  color: var(--gray-600);
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.stat-info p {
+  color: var(--gray-900);
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.stat-change {
+  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: var(--radius-full);
+  font-weight: 500;
+}
+
+.stat-change.positive {
+  color: var(--success);
+  background-color: rgba(129, 199, 132, 0.1);
+}
+
+.stat-change.negative {
+  color: var(--danger);
+  background-color: rgba(229, 115, 115, 0.1);
+}
+
+.stat-change.neutral {
+  color: var(--gray-600);
+  background-color: var(--gray-100);
+}
+
+/* Charts and Recent Orders */
+.admin-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
 }
 
 .chart-container {
   background: var(--white);
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.chart-header h3 {
+  color: var(--gray-900);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.chart-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.chart-period {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--gray-100);
+  color: var(--gray-700);
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.chart-period:hover,
+.chart-period.active {
+  background-color: var(--primary-color);
+  color: var(--white);
+}
+
+/* Products Section */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.section-header h2 {
+  color: var(--gray-900);
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.admin-btn {
+  background: var(--primary-color);
+  color: var(--white);
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: var(--transition);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.admin-btn:hover {
+  background: var(--secondary-color);
+  transform: translateY(-2px);
+}
+
+.admin-btn.secondary {
+  background: var(--gray-100);
+  color: var(--gray-700);
+}
+
+.admin-btn.secondary:hover {
+  background: var(--gray-200);
+}
+
+/* Product Form */
+.admin-form {
+  background: var(--white);
   padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
   margin-bottom: 2.5rem;
 }
 
-.admin-form {
-  background: var(--white);
-  padding: 2.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  margin-bottom: 2.5rem;
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .form-group {
-  margin-bottom: 1.8rem;
+  margin-bottom: 1.25rem;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 0.8rem;
-  color: var(--text-color);
+  margin-bottom: 0.5rem;
+  color: var(--gray-700);
   font-weight: 500;
+  font-size: 0.875rem;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
   width: 100%;
-  padding: 0.9rem 1rem;
-  border: 2px solid var(--gray-medium);
-  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius-md);
   transition: var(--transition);
-  color: var(--text-color);
+  color: var(--gray-900);
   background-color: var(--white);
+  font-size: 0.875rem;
 }
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: var(--blue-gray);
-  box-shadow: 0 0 0 3px rgba(112, 128, 144, 0.1);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(136, 74, 57, 0.1);
 }
 
-.admin-btn {
-  background: var(--blue-gray);
-  color: var(--white);
-  padding: 1rem 2rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: var(--transition);
-  font-weight: 600;
-  font-size: 1rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
+.form-group textarea {
+  min-height: 120px;
+  resize: vertical;
 }
 
-.admin-btn:hover {
-  background: var(--dark);
-  transform: translateY(-2px);
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--gray-200);
+}
+
+/* Responsive Design */
+@media (max-width: 1400px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 1200px) {
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 768px) {
-  .auth-sections {
-    grid-template-columns: 1fr;
-  }
-
-  .auth-image {
-    min-height: 200px;
-  }
-
-  .auth-forms {
-    padding: 2rem;
-  }
-
   .admin-container {
     grid-template-columns: 1fr;
   }
 
   .admin-nav {
     position: fixed;
-    width: 100%;
-    height: auto;
     bottom: 0;
     left: 0;
-    z-index: 1000;
+    width: 100%;
+    height: auto;
     padding: 1rem;
+    z-index: 1000;
   }
 
-  .admin-content {
-    margin-left: 0;
-    margin-bottom: 80px;
+  .admin-nav-header,
+  .admin-menu span,
+  .back-to-site span {
+    display: none;
   }
 
   .admin-menu {
@@ -1158,30 +1317,38 @@ body {
     justify-content: space-around;
   }
 
+  .admin-menu li {
+    padding: 0;
+  }
+
   .admin-menu a {
     flex-direction: column;
-    padding: 0.5rem;
+    padding: 0.75rem;
     text-align: center;
-    border-left: none;
-    border-bottom: 3px solid transparent;
+    gap: 0.375rem;
   }
 
-  .admin-menu a:hover,
-  .admin-menu a.active {
-    border-left: none;
-    border-bottom-color: var(--blue-gray);
+  .admin-content {
+    margin-left: 0;
+    margin-bottom: 80px;
+    padding: 1.5rem;
   }
 
-  .admin-menu a span {
-    display: none;
+  .admin-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
   }
 
-  .admin-nav-header,
-  .back-to-site {
-    display: none;
+  .admin-user {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
   }
 }
-
 /* Auth Page Styles */
 .auth-page {
   min-height: 100vh;
