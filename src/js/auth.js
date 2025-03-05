@@ -1,13 +1,13 @@
-import { createClient } from '@supabase/supabase-js';
+// import { createClient } from '@supabase/supabase-js';
 
 // Initialize Supabase client
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+// const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 document.addEventListener('DOMContentLoaded', () => {
     // Check if user is already logged in
-    checkAuthState();
+    // checkAuthState();
     
     // Switch between login and register forms
     const switchButtons = document.querySelectorAll('.switch-form');
@@ -135,24 +135,24 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-async function checkAuthState() {
-    const { data: { user } } = await supabase.auth.getUser();
+// async function checkAuthState() {
+//     const { data: { user } } = await supabase.auth.getUser();
     
-    if (user) {
-        // User is already logged in, redirect appropriately
-        const { data } = await supabase
-            .from('users')
-            .select('role')
-            .eq('id', user.id)
-            .single();
+//     if (user) {
+//         // User is already logged in, redirect appropriately
+//         const { data } = await supabase
+//             .from('users')
+//             .select('role')
+//             .eq('id', user.id)
+//             .single();
             
-        if (data && data.role === 'admin') {
-            window.location.href = '/admin.html';
-        } else {
-            window.location.href = '/';
-        }
-    }
-}
+//         if (data && data.role === 'admin') {
+//             window.location.href = '/admin.html';
+//         } else {
+//             window.location.href = '/';
+//         }
+//     }
+// }
 
 async function signUp(email, password, firstName, lastName) {
     const { data, error } = await supabase.auth.signUp({
