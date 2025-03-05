@@ -280,3 +280,41 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 
 // Initialize cart functionality
 initializeCart();
+
+// FAQs functionality
+document.addEventListener('DOMContentLoaded', () => {
+    const faqCards = document.querySelectorAll('.faq-card');
+
+    faqCards.forEach(card => {
+        const header = card.querySelector('.faq-header');
+        const content = card.querySelector('.faq-content');
+        const toggle = card.querySelector('.faq-toggle');
+
+        header.addEventListener('click', () => {
+            // Close all other cards
+            faqCards.forEach(otherCard => {
+                if (otherCard !== card && otherCard.classList.contains('active')) {
+                    otherCard.classList.remove('active');
+                    // Reset icon for other cards
+                    const otherToggle = otherCard.querySelector('.faq-toggle i');
+                    otherToggle.className = 'fas fa-plus';
+                    // Reset height
+                    otherCard.querySelector('.faq-content').style.height = '0';
+                }
+            });
+
+            // Toggle current card
+            card.classList.toggle('active');
+            
+            // Toggle icon
+            const icon = toggle.querySelector('i');
+            if (card.classList.contains('active')) {
+                icon.className = 'fas fa-minus';
+                content.style.height = content.scrollHeight + 'px';
+            } else {
+                icon.className = 'fas fa-plus';
+                content.style.height = '0';
+            }
+        });
+    });
+});
