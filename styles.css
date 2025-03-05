@@ -466,6 +466,40 @@ body {
   transform: translateX(4px);
 }
 
+.catalog-action {
+  display: flex;
+  justify-content: center;
+  margin-top: 3rem;
+}
+
+.catalog-action .cta-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  background-color: var(--blue-gray);
+  color: var(--white);
+  text-decoration: none;
+  border-radius: var(--radius-full);
+  font-weight: 500;
+  transition: var(--transition);
+}
+
+.catalog-action .cta-button:hover {
+  background-color: var(--accent-color-light);
+  color: var(--dark);
+  transform: translateY(-2px);
+}
+
+.catalog-action .cta-button i {
+  transition: transform 0.3s ease;
+}
+
+.catalog-action .cta-button:hover i {
+  transform: translateX(4px);
+}
+
+
 /* Featured Products Section */
 .featured-products {
   padding: 6rem 0;
