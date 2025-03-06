@@ -41,7 +41,7 @@ app.use('/src', express.static(join(__dirname, '../src')));
 app.get('/api/supabase-config', (req, res) => {
   res.json({
     url: process.env.SUPABASE_URL,
-    anonKey: process.env.SUPABASE_KEY_SECRET
+    anonKey: process.env.SUPABASE_SECRET
   });
 });
 
