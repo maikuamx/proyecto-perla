@@ -100,7 +100,7 @@ function setupLoginForm() {
             // Redirect based on user role
             setTimeout(() => {
                 if (profile.role === 'admin') {
-                    window.location.href = '../../admin.html';
+                    window.location.href = '/proyecto-perla/admin.html';
                 } else {
                     const checkoutRedirect = localStorage.getItem('checkoutRedirect');
                     if (checkoutRedirect) {
