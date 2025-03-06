@@ -88,16 +88,27 @@ function setupLoginForm() {
 
             if (error) throw error;
 
+            // Get user profile to check role
+            const { data: profile } = await window.supabaseClient
+                .from('users')
+                .select('*')
+                .eq('id', data.user.id)
+                .single();
+
             showSuccess('¡Inicio de sesión exitoso!');
             
-            // Redirect after successful login
+            // Redirect based on user role
             setTimeout(() => {
-                const checkoutRedirect = localStorage.getItem('checkoutRedirect');
-                if (checkoutRedirect) {
-                    localStorage.removeItem('checkoutRedirect');
-                    window.location.href = '/cart.html';
+                if (profile.role === 'admin') {
+                    window.location.href = '/admin.html';
                 } else {
-                    window.location.href = '/';
+                    const checkoutRedirect = localStorage.getItem('checkoutRedirect');
+                    if (checkoutRedirect) {
+                        localStorage.removeItem('checkoutRedirect');
+                        window.location.href = '/cart.html';
+                    } else {
+                        window.location.href = '/';
+                    }
                 }
             }, 1500);
 
@@ -129,7 +140,6 @@ function setupRegisterForm() {
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creando cuenta...';
             submitBtn.disabled = true;
 
-            // Create user in auth
             const { data: { user }, error: signUpError } = await window.supabaseClient.auth.signUp({
                 email,
                 password
@@ -137,7 +147,6 @@ function setupRegisterForm() {
 
             if (signUpError) throw signUpError;
 
-            // Create user profile
             const { error: profileError } = await window.supabaseClient
                 .from('users')
                 .insert([{
@@ -152,7 +161,6 @@ function setupRegisterForm() {
 
             showSuccess('¡Cuenta creada exitosamente!');
             
-            // Switch to login form after successful registration
             setTimeout(() => {
                 const loginForm = document.getElementById('loginForm');
                 const registerForm = document.getElementById('registerForm');

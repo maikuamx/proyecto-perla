@@ -1,11 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
-import { loadStripe } from '@stripe/stripe-js';
 import { showSuccess, showError, showInfo } from './utils/toast.js';
-
-// Initialize Supabase client
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Initialize Stripe
 let stripe;
@@ -13,7 +6,9 @@ let elements;
 let paymentElement;
 
 async function initializeStripe() {
-    stripe = await loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+    const response = await fetch('/api/stripe-config');
+    const { publishableKey } = await response.json();
+    stripe = await loadStripe(publishableKey);
     const clientSecret = await createPaymentIntent();
     
     elements = stripe.elements({

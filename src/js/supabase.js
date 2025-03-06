@@ -1,13 +1,14 @@
 // API URL for backend communication
-const API_URL = 'https://proyecto-perla.onrender.com/api';
+const API_URL = 'https://sapphirus.com.mx/api';
 
 // Initialize Supabase client
-window.initSupabase = function() {
+window.initSupabase = async function() {
     if (!window.supabaseClient) {
-        window.supabaseClient = window.supabase.createClient(
-            'https://rxjquziaipslqtmgqeoz.supabase.co',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4anF1emlhaXBzbHF0bWdxZW96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA0MjQzMTEsImV4cCI6MjA1NjAwMDMxMX0.iu4ovJ2QumGBROQOnbljQ9kPSirYvfgYiEukxJrHD3Q'
-        );
+        // Get Supabase configuration from server
+        const response = await fetch(`${API_URL}/supabase-config`);
+        const { url, anonKey } = await response.json();
+        
+        window.supabaseClient = window.supabase.createClient(url, anonKey);
     }
     return window.supabaseClient;
 };
