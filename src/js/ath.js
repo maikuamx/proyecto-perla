@@ -1,4 +1,4 @@
-import * as echarts from 'https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js';
+import * as echarts from 'echarts';
 import { showSuccess, showError } from './utils/toast.js';
 
 const API_URL = 'https://proyecto-perla.onrender.com/api';
@@ -334,7 +334,7 @@ function initializeCharts(stats) {
         tooltip: { trigger: 'axis' },
         xAxis: { type: 'category', data: dates },
         yAxis: { type: 'value' },
-        series: [{ name: 'Ingresos (€)', type: 'line', data: revenues, smooth: true }]
+        series: [{ name: 'Ingresos ($)', type: 'line', data: revenues, smooth: true }]
     };
     
     chart.setOption(option);
