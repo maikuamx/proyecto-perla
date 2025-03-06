@@ -162,8 +162,8 @@ async function loadProducts() {
                     <h3>${product.name}</h3>
                     <p>${product.description}</p>
                     <div class="price-info">
-                        <span class="price">€${product.price}</span>
-                        ${product.original_price ? `<span class="original-price">€${product.original_price}</span>` : ''}
+                        <span class="price">$${product.price}</span>
+                        ${product.original_price ? `<span class="original-price">$${product.original_price}</span>` : ''}
                     </div>
                     <div class="product-actions">
                         <button class="edit-product" data-id="${product.id}">

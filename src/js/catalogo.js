@@ -79,9 +79,9 @@ function createProductCard(product) {
                 <div class="product-category">${product.category}</div>
                 <h3 class="product-title">${product.name}</h3>
                 <div class="product-price-container">
-                    <span class="product-price">€${product.price.toFixed(2)}</span>
+                    <span class="product-price">${product.price.toFixed(2)}</span>
                     ${product.original_price ? `
-                        <span class="product-original-price">€${product.original_price.toFixed(2)}</span>
+                        <span class="product-original-price">$${product.original_price.toFixed(2)}</span>
                         <span class="product-discount">-${discount}%</span>
                     ` : ''}
                 </div>
@@ -96,7 +96,7 @@ function createProductCard(product) {
                 </div>
             </div>
         </div>
-    `;
+    `;$
 }
 
 function setupProductInteractions() {

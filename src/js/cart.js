@@ -153,7 +153,7 @@ function loadCart() {
             <img src="${item.image}" alt="${item.name}" class="cart-item-image">
             <div class="cart-item-details">
                 <h3>${item.name}</h3>
-                <p class="cart-item-price">€${item.price.toFixed(2)}</p>
+                <p class="cart-item-price">$${item.price.toFixed(2)}</p>
                 <div class="cart-item-quantity">
                     <button class="quantity-btn quantity-decrease">
                         <i class="fas fa-minus"></i>
@@ -189,10 +189,10 @@ function updateCartSummary(cart) {
     const taxes = subtotal * 0.21;
     const total = subtotal + shipping + taxes;
     
-    document.getElementById('subtotal').textContent = `€${subtotal.toFixed(2)}`;
-    document.getElementById('shipping').textContent = shipping === 0 ? 'Gratis' : `€${shipping.toFixed(2)}`;
-    document.getElementById('taxes').textContent = `€${taxes.toFixed(2)}`;
-    document.getElementById('total').textContent = `€${total.toFixed(2)}`;
+    document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
+    document.getElementById('shipping').textContent = shipping === 0 ? 'Gratis' : `$${shipping.toFixed(2)}`;
+    document.getElementById('taxes').textContent = `$${taxes.toFixed(2)}`;
+    document.getElementById('total').textContent = `$${total.toFixed(2)}`;
 }
 
 function updateItemQuantity(itemId, change) {
