@@ -1,13 +1,16 @@
 import * as echarts from 'https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js';
 import { showSuccess, showError } from './utils/toast.js';
 
+const API_URL = 'https://proyecto-perla.onrender.com/api';
+
+
 // Initialize Supabase client
 let supabase;
 
 async function initAdminPanel() {
     try {
         // Initialize Supabase client
-        const response = await fetch('/api/supabase-config');
+        const response = await fetch(`${API_URL}/supabase-config`);
         const { url, anonKey } = await response.json();
         supabase = supabase.createClient(url, anonKey);
         
