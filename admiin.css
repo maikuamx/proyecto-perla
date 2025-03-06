@@ -623,3 +623,56 @@
       padding: 1rem;
     }
   }
+
+  /* Add these styles to your existing admin.css */
+.revenue-table-container {
+  margin-top: 2rem;
+  overflow-x: auto;
+}
+
+.revenue-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.revenue-table th,
+.revenue-table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.revenue-table th {
+  background-color: var(--gray-50);
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+.revenue-table tr:hover {
+  background-color: var(--gray-50);
+}
+
+.revenue-table td {
+  color: var(--gray-600);
+}
+
+.revenue-table td:last-child {
+  font-weight: 500;
+  color: var(--primary-color);
+}
+
+.chart-period {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--gray-200);
+  background: var(--white);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.chart-period:hover,
+.chart-period.active {
+  background: var(--primary-color);
+  color: var(--white);
+  border-color: var(--primary-color);
+}

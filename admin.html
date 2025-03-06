@@ -21,7 +21,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./admin.css">
+    <link rel="stylesheet" href="./admiin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.6.0/dist/echarts.min.js"></script>
@@ -107,7 +107,7 @@
                     </div>
                     <div class="stat-info">
                         <h3>Ingresos Totales</h3>
-                        <p id="totalRevenue">$0.00</p>
+                        <p id="totalRevenue">€0.00</p>
                         <span class="stat-change positive">+12% este mes</span>
                     </div>
                 </div>
@@ -138,12 +138,24 @@
                     <div class="chart-header">
                         <h3>Ingresos Mensuales</h3>
                         <div class="chart-actions">
-                            <button class="chart-period active">7 días</button>
-                            <button class="chart-period">30 días</button>
-                            <button class="chart-period">1 año</button>
+                            <button class="chart-period active" data-period="7">7 días</button>
+                            <button class="chart-period" data-period="30">30 días</button>
+                            <button class="chart-period" data-period="365">1 año</button>
                         </div>
                     </div>
-                    <canvas id="revenueChart"></canvas>
+                    <div class="revenue-table-container">
+                        <table class="revenue-table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Ingresos</th>
+                                </tr>
+                            </thead>
+                            <tbody id="revenueTableBody">
+                                <!-- Revenue data will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <div class="recent-orders">
@@ -216,6 +228,6 @@
 
     <script src="/src/js/utils/toast.js"></script>
     <script type="module" src="/src/js/supabas.js"></script>
-    <script type="module" src="/src/js/admiiin.js"></script>
+    <script type="module" src="/src/js/aadmiiin.js"></script>
 </body>
 </html>

@@ -88,6 +88,57 @@ function updateStats({ userCount, totalRevenue, completedOrders, activeProducts 
     document.getElementById('activeProducts').textContent = activeProducts;
 }
 
+function initializeCharts(stats) {
+    displayRevenueTable(stats);
+    setupChartPeriodButtons(stats);
+}
+
+function displayRevenueTable(stats) {
+    const tableBody = document.getElementById('revenueTableBody');
+    if (!tableBody) return;
+    
+    tableBody.innerHTML = '';
+    stats.revenueData
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .slice(0, 7) // Show last 7 days by default
+        .forEach(entry => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${new Date(entry.date).toLocaleDateString('es-ES')}</td>
+                <td>${new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'MXN' }).format(entry.total)}</td>
+            `;
+            tableBody.appendChild(row);
+        });
+}
+
+function setupChartPeriodButtons(stats) {
+    const buttons = document.querySelectorAll('.chart-period');
+    buttons.forEach(button => {
+        button.addEventListener('click', () => {
+            // Remove active class from all buttons
+            buttons.forEach(btn => btn.classList.remove('active'));
+            // Add active class to clicked button
+            button.classList.add('active');
+            
+            // Get selected period
+            const days = parseInt(button.dataset.period);
+            
+            // Filter and display data
+            const filteredData = {
+                ...stats,
+                revenueData: stats.revenueData
+                    .filter(entry => {
+                        const date = new Date(entry.date);
+                        const daysAgo = (new Date() - date) / (1000 * 60 * 60 * 24);
+                        return daysAgo <= days;
+                    })
+            };
+            
+            displayRevenueTable(filteredData);
+        });
+    });
+}
+
 async function loadProducts() {
     try {
         const { data: products, error } = await supabase
@@ -315,7 +366,6 @@ function setupLogout() {
     }
 }
 
-
 async function addProduct(productData) {
     try {
         const { error } = await supabase.from('products').insert([productData]);
@@ -325,18 +375,6 @@ async function addProduct(productData) {
         console.error('Error adding product:', error);
         showError('Error al agregar el producto');
     }
-}
-
-function displayRevenueTable(stats) {
-    const tableBody = document.getElementById('revenueTableBody');
-    if (!tableBody) return;
-    
-    tableBody.innerHTML = '';
-    stats.revenueData.forEach(entry => {
-        const row = document.createElement('tr');
-        row.innerHTML = `<td>${new Date(entry.date).toLocaleDateString('es-ES')}</td><td>${new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'MXN' }).format(entry.total)}</td>`;
-        tableBody.appendChild(row);
-    });
 }
 
 document.addEventListener('DOMContentLoaded', initAdminPanel);
