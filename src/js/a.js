@@ -320,68 +320,24 @@ function setupLogout() {
 
 function initializeCharts(stats) {
     const chartDom = document.getElementById('revenueChart');
-    const myChart = echarts.init(chartDom);
-
-    const dates = stats.revenueData.map(entry => 
-        new Date(entry.date).toLocaleDateString('es-ES', {
-            day: 'numeric',
-            month: 'short'
-        })
-    );
+    if (!chartDom) {
+        console.error("Error: Elemento 'revenueChart' no encontrado en el DOM.");
+        return;
+    }
+    const chart = echarts.init(chartDom);
     
+    const dates = stats.revenueData.map(entry => new Date(entry.date).toLocaleDateString('es-ES'));
     const revenues = stats.revenueData.map(entry => entry.total);
 
     const option = {
-        title: {
-            text: 'Ingresos últimos 7 días',
-            left: 'center'
-        },
-        tooltip: {
-            trigger: 'axis',
-            formatter: function(params) {
-                return `${params[0].name}<br/>
-                        Ingresos: €${params[0].value.toFixed(2)}`;
-            }
-        },
-        xAxis: {
-            type: 'category',
-            data: dates,
-            axisLabel: {
-                rotate: 45
-            }
-        },
-        yAxis: {
-            type: 'value',
-            axisLabel: {
-                formatter: value => `€${value}`
-            }
-        },
-        series: [{
-            name: 'Ingresos',
-            type: 'line',
-            data: revenues,
-            smooth: true,
-            lineStyle: {
-                color: '#884A39'
-            },
-            itemStyle: {
-                color: '#884A39'
-            },
-            areaStyle: {
-                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                    { offset: 0, color: 'rgba(136, 74, 57, 0.5)' },
-                    { offset: 1, color: 'rgba(136, 74, 57, 0.1)' }
-                ])
-            }
-        }]
+        title: { text: 'Ingresos últimos 7 días', left: 'center' },
+        tooltip: { trigger: 'axis' },
+        xAxis: { type: 'category', data: dates },
+        yAxis: { type: 'value' },
+        series: [{ name: 'Ingresos (€)', type: 'line', data: revenues, smooth: true }]
     };
-
-    myChart.setOption(option);
-
-    // Handle resize
-    window.addEventListener('resize', () => {
-        myChart.resize();
-    });
+    
+    chart.setOption(option);
 }
 
 // Initialize when DOM is loaded
