@@ -1,3 +1,4 @@
+import Chart from 'chart.js/auto';
 import { showSuccess, showError } from './utils/toast.js';
 
 // Initialize Supabase client
