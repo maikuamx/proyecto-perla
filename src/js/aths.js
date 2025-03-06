@@ -1,4 +1,4 @@
-import * as echarts from 'echarts';
+import * as echarts from '../../node_modules/echarts';
 import { showSuccess, showError } from './utils/toast.js';
 
 const API_URL = 'https://proyecto-perla.onrender.com/api';
