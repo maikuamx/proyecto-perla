@@ -1,4 +1,11 @@
-import { getProducts, getProductsByCategory } from './supabase.js';
+import { initAuthState } from './js/auth/authState.js';
+import { getProducts, getProductsByCategory } from './js/supabase.js';
+
+// Initialize auth state
+document.addEventListener('DOMContentLoaded', () => {
+    initAuthState();
+    initializeCatalog();
+});
 
 // Initialize catalog
 async function initializeCatalog() {
@@ -256,6 +263,3 @@ function closeImagePreview() {
         document.body.style.overflow = '';
     }
 }
-
-// Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', initializeCatalog);
