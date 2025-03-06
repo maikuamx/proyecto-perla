@@ -1,5 +1,5 @@
 // API URL for backend communication
-const API_URL = 'https://sapphirus.com.mx/api';
+const API_URL = 'https://proyecto-perla.onrender.com/api';
 
 // Initialize Supabase client
 window.initSupabase = async function() {
