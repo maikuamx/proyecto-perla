@@ -1,4 +1,4 @@
-import * as echarts from 'echarts';
+import * as echarts from 'https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js';
 import { showSuccess, showError } from './utils/toast.js';
 
 // Initialize Supabase client
