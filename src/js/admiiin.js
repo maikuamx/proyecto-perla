@@ -327,14 +327,6 @@ async function addProduct(productData) {
     }
 }
 
-
-function updateStats({ userCount, totalRevenue, completedOrders, activeProducts }) {
-    document.getElementById('userCount').textContent = userCount;
-    document.getElementById('totalRevenue').textContent = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'MXN' }).format(totalRevenue);
-    document.getElementById('completedOrders').textContent = completedOrders;
-    document.getElementById('activeProducts').textContent = activeProducts;
-}
-
 function displayRevenueTable(stats) {
     const tableBody = document.getElementById('revenueTableBody');
     if (!tableBody) return;
