@@ -23,6 +23,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/date-fns@2.30.0/index.min.js"></script>
 </head>
 <body>
     <div class="admin-container">
@@ -104,7 +107,7 @@
                     </div>
                     <div class="stat-info">
                         <h3>Ingresos Totales</h3>
-                        <p id="totalRevenue">$0.00</p>
+                        <p id="totalRevenue">€0.00</p>
                         <span class="stat-change positive">+12% este mes</span>
                     </div>
                 </div>
@@ -211,6 +214,6 @@
         </main>
     </div>
 
-    <script type="module" src="src/js/admin.js"></script>
+    <script type="module" src="/src/js/admin.js"></script>
 </body>
 </html>
