@@ -1,96 +1,19 @@
-import { createClient } from '@supabase/supabase-js';
-
-// Initialize Supabase client
-const supabaseUrl = 'https://rxjquziaipslqtmgqeoz.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4anF1emlhaXBzbHF0bWdxZW96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA0MjQzMTEsImV4cCI6MjA1NjAwMDMxMX0.iu4ovJ2QumGBROQOnbljQ9kPSirYvfgYiEukxJrHD3Q';
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-// API base URL
+// Initialize Supabase client using the server environment
 const API_URL = 'https://proyecto-perla.onrender.com/api';
 
-// Auth functions
-export async function signUp(email, password, firstName, lastName) {
-  try {
-    const response = await fetch(`${API_URL}/auth/register`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        email,
-        password,
-        firstName,
-        lastName
-      })
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error);
-    }
-
-    return await response.json();
-  } catch (error) {
-    throw error;
+// Initialize Supabase client
+window.initSupabase = function() {
+  if (!window.supabaseClient) {
+    window.supabaseClient = window.supabase.createClient(
+      'https://rxjquziaipslqtmgqeoz.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4anF1emlhaXBzbHF0bWdxZW96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA0MjQzMTEsImV4cCI6MjA1NjAwMDMxMX0.iu4ovJ2QumGBROQOnbljQ9kPSirYvfgYiEukxJrHD3Q'
+    );
   }
-}
-
-export async function signIn(email, password) {
-  try {
-    const response = await fetch(`${API_URL}/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        email,
-        password
-      })
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error);
-    }
-
-    const data = await response.json();
-    localStorage.setItem('token', data.session.access_token);
-    return data;
-  } catch (error) {
-    throw error;
-  }
-}
-
-export async function signOut() {
-  localStorage.removeItem('token');
-  const { error } = await supabase.auth.signOut();
-  if (error) throw error;
-}
-
-export async function getCurrentUser() {
-  const token = localStorage.getItem('token');
-  if (!token) return null;
-
-  try {
-    const { data: { user }, error } = await supabase.auth.getUser(token);
-    if (error) throw error;
-
-    const { data: profile } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', user.id)
-      .single();
-
-    return { ...user, ...profile };
-  } catch (error) {
-    localStorage.removeItem('token');
-    return null;
-  }
-}
+  return window.supabaseClient;
+};
 
 // Product functions
-export async function getProducts() {
+async function getProducts() {
   const response = await fetch(`${API_URL}/products`);
   if (!response.ok) {
     const error = await response.json();
@@ -99,7 +22,7 @@ export async function getProducts() {
   return await response.json();
 }
 
-export async function getProductsByCategory(category) {
+async function getProductsByCategory(category) {
   const response = await fetch(`${API_URL}/products/category/${category}`);
   if (!response.ok) {
     const error = await response.json();
@@ -108,115 +31,54 @@ export async function getProductsByCategory(category) {
   return await response.json();
 }
 
-// Admin functions
-export async function isAdmin() {
-  const user = await getCurrentUser();
-  return user?.role === 'admin';
-}
-
-export async function addProduct(productData) {
-  const token = localStorage.getItem('token');
-  const response = await fetch(`${API_URL}/products`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify(productData)
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error);
-  }
-  return await response.json();
-}
-
-export async function updateProduct(id, updates) {
-  const token = localStorage.getItem('token');
-  const response = await fetch(`${API_URL}/products/${id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify(updates)
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error);
-  }
-  return await response.json();
-}
-
-export async function deleteProduct(id) {
-  const token = localStorage.getItem('token');
-  const response = await fetch(`${API_URL}/products/${id}`, {
-    method: 'DELETE',
-    headers: {
-      'Authorization': `Bearer ${token}`
-    }
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error);
-  }
-}
-
 // Cart functions
-export async function saveCart(items) {
-  const user = await getCurrentUser();
+async function saveCart(items) {
+  const supabaseClient = window.initSupabase();
+  const { data: { user } } = await supabaseClient.auth.getUser();
   if (!user) {
     localStorage.setItem('cart', JSON.stringify(items));
     return;
   }
 
-  const token = localStorage.getItem('token');
-  const response = await fetch(`${API_URL}/cart`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify({ items })
-  });
+  const { error } = await supabaseClient
+    .from('carts')
+    .upsert({
+      user_id: user.id,
+      items: items
+    })
+    .select();
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error);
-  }
+  if (error) throw error;
 }
 
-export async function getCart() {
-  const user = await getCurrentUser();
+async function getCart() {
+  const supabaseClient = window.initSupabase();
+  const { data: { user } } = await supabaseClient.auth.getUser();
   if (!user) {
     return JSON.parse(localStorage.getItem('cart')) || { items: [] };
   }
 
-  const token = localStorage.getItem('token');
-  const response = await fetch(`${API_URL}/cart`, {
-    headers: {
-      'Authorization': `Bearer ${token}`
-    }
-  });
+  const { data, error } = await supabaseClient
+    .from('carts')
+    .select('*')
+    .eq('user_id', user.id)
+    .single();
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error);
-  }
-  return await response.json();
+  if (error && error.code !== 'PGRST116') throw error;
+  return data || { items: [] };
 }
 
 // Checkout functions
-export async function createCheckoutSession(items) {
-  const token = localStorage.getItem('token');
+async function createCheckoutSession(items) {
+  const supabaseClient = window.initSupabase();
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (!user) throw new Error('User must be logged in to checkout');
+
   const response = await fetch(`${API_URL}/checkout`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
+      'Authorization': `Bearer ${(await supabaseClient.auth.getSession()).data.session?.access_token}`
     },
     body: JSON.stringify({ items })
   });
@@ -229,3 +91,12 @@ export async function createCheckoutSession(items) {
   const { url } = await response.json();
   window.location.href = url;
 }
+
+// Make functions available globally
+window.getProducts = getProducts;
+window.getProductsByCategory = getProductsByCategory;
+window.saveCart = saveCart;
+window.getCart = getCart;
+window.createCheckoutSession = createCheckoutSession;
+
+export { getProducts, getProductsByCategory }
