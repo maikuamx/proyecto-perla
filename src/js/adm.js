@@ -1,3 +1,8 @@
+import * as echarts from 'https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js';
+import { showSuccess, showError } from './utils/toast.js';
+
+const API_URL = 'https://proyecto-perla.onrender.com/api';
+
 // Initialize Supabase client
 let supabase;
 
