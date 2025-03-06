@@ -1760,3 +1760,160 @@ body {
     transform: translateY(0);
   }
 }
+
+
+/* Verification page styles */
+.verify-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--gray-100);
+}
+
+.verify-container {
+  width: 100%;
+  max-width: 480px;
+  padding: 2rem;
+}
+
+.verify-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 3rem 2rem;
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+}
+
+.verify-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.verify-state i {
+  font-size: 3rem;
+  color: var(--primary-color);
+}
+
+.verify-state h2 {
+  font-size: 1.5rem;
+  color: var(--dark);
+  margin: 0;
+}
+
+.verify-state p {
+  color: var(--gray-600);
+  margin: 0;
+}
+
+.verify-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 2rem;
+  background-color: var(--primary-color);
+  color: var(--white);
+  text-decoration: none;
+  border-radius: var(--radius-full);
+  font-weight: 500;
+  transition: var(--transition);
+  margin-top: 1rem;
+}
+
+.verify-btn:hover {
+  background-color: var(--secondary-color);
+  transform: translateY(-2px);
+}
+
+/* Toast styles */
+.auth-toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  background: var(--white);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  z-index: 1000;
+  animation: slideIn 0.3s ease;
+  max-width: 400px;
+  min-width: 300px;
+}
+
+.auth-toast.error {
+  border-left: 4px solid var(--danger);
+}
+
+.auth-toast.success {
+  border-left: 4px solid var(--success);
+}
+
+.auth-toast.warning {
+  border-left: 4px solid var(--warning);
+}
+
+.auth-toast i {
+  font-size: 1.25rem;
+}
+
+.auth-toast.error i {
+  color: var(--danger);
+}
+
+.auth-toast.success i {
+  color: var(--success);
+}
+
+.auth-toast.warning i {
+  color: var(--warning);
+}
+
+.auth-toast span {
+  flex: 1;
+  font-size: 0.875rem;
+  color: var(--gray-800);
+}
+
+.auth-toast button {
+  background: none;
+  border: none;
+  color: var(--gray-500);
+  cursor: pointer;
+  padding: 0.25rem;
+  transition: var(--transition);
+}
+
+.auth-toast button:hover {
+  color: var(--gray-700);
+}
+
+.auth-toast.fade-out {
+  animation: slideOut 0.3s ease forwards;
+}
+
+@keyframes slideIn {
+  from {
+      transform: translateX(100%);
+      opacity: 0;
+  }
+  to {
+      transform: translateX(0);
+      opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+      transform: translateX(0);
+      opacity: 1;
+  }
+  to {
+      transform: translateX(100%);
+      opacity: 0;
+  }
+}
