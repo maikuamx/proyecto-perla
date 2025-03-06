@@ -3,26 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Favicon principal -->
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon/favicon-16x16.png">
-    <link rel="icon" type="image/x-icon" href="assets/favicon/favicon.ico">
-
-    <!-- Apple Touch Icon -->
-    <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon/apple-touch-icon.png">
-
-    <!-- Iconos para Android Chrome -->
-    <link rel="icon" type="image/png" sizes="192x192" href="assets/favicon/android-chrome-192x192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="assets/favicon/android-chrome-512x512.png">
-
-    <!-- Web App Manifest -->
-    <link rel="manifest" href="assets/favicon/site.webmanifest">
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="./cart.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://js.stripe.com/v3/"></script>
     <title>Carrito de Compras - Sapphirus</title>
 </head>
 <body>
@@ -53,46 +40,67 @@
     </nav>
 
     <main class="cart-page">
-        <div class="container">
-            <div class="cart-container">
-                <div class="cart-header">
-                    <h1>Tu Carrito</h1>
-                    <a href="/" class="continue-shopping-link">Seguir comprando</a>
+        <div class="cart-container">
+            <div class="cart-grid">
+                <div class="cart-items-section">
+                    <h1>Carrito de Compras</h1>
+                    
+                    <div id="cartItems" class="cart-items">
+                        <!-- Cart items will be loaded dynamically -->
+                    </div>
+
+                    <div id="cartEmpty" class="empty-cart" style="display: none;">
+                        <i class="fas fa-shopping-cart"></i>
+                        <h2>Tu carrito está vacío</h2>
+                        <p>Parece que aún no has añadido productos a tu carrito.</p>
+                        <a href="/#catalog" class="continue-shopping">Explorar productos</a>
+                    </div>
+
+                    <a href="/catalogo.html" class="continue-shopping-link">
+                        <i class="fas fa-arrow-left"></i>
+                        Continuar comprando
+                    </a>
                 </div>
 
-                <div id="cartItems" class="cart-items">
-                    <!-- Cart items will be loaded dynamically -->
-                </div>
+                <div class="cart-summary-section">
+                    <div id="cartSummary" class="cart-summary">
+                        <h2>Resumen del Pedido</h2>
+                        
+                        <div class="summary-details">
+                            <div class="summary-row">
+                                <span>Subtotal</span>
+                                <span id="subtotal">€0.00</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Envío</span>
+                                <span id="shipping">€0.00</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Impuestos</span>
+                                <span id="taxes">€0.00</span>
+                            </div>
+                            <div class="summary-row total">
+                                <span>Total</span>
+                                <span id="total">€0.00</span>
+                            </div>
+                        </div>
 
-                <div id="cartEmpty" class="empty-cart" style="display: none;">
-                    <i class="fas fa-shopping-cart"></i>
-                    <h2>Tu carrito está vacío</h2>
-                    <p>Parece que aún no has añadido productos a tu carrito.</p>
-                    <a href="/#catalog" class="continue-shopping">Explorar productos</a>
-                </div>
+                        <div class="payment-section">
+                            <h3>Método de Pago</h3>
+                            <div id="payment-element"></div>
+                            <div id="payment-message" class="payment-message"></div>
+                        </div>
 
-                <div id="cartSummary" class="cart-summary">
-                    <h2>Resumen del Pedido</h2>
-                    <div class="summary-row">
-                        <span>Subtotal</span>
-                        <span id="subtotal">€0.00</span>
+                        <button id="checkoutBtn" class="checkout-btn">
+                            Proceder al pago
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+
+                        <div class="secure-checkout">
+                            <i class="fas fa-lock"></i>
+                            <span>Pago seguro con cifrado SSL</span>
+                        </div>
                     </div>
-                    <div class="summary-row">
-                        <span>Envío</span>
-                        <span id="shipping">€0.00</span>
-                    </div>
-                    <div class="summary-row">
-                        <span>Impuestos</span>
-                        <span id="taxes">€0.00</span>
-                    </div>
-                    <div class="summary-row total">
-                        <span>Total</span>
-                        <span id="total">€0.00</span>
-                    </div>
-                    <button id="checkoutBtn" class="checkout-btn">
-                        Proceder al pago
-                        <i class="fas fa-arrow-right"></i>
-                    </button>
                 </div>
             </div>
         </div>
@@ -129,6 +137,6 @@
         </div>
     </footer>
 
-    <script type="module" src="src/js/cart.js"></script>
+    <script type="module" src="/src/js/cart.js"></script>
 </body>
 </html>

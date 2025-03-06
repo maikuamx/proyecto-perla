@@ -1,3 +1,5 @@
+import { showSuccess, showError } from './utils/toast.js';
+
 // Auth state management
 let currentUser = null;
 
@@ -9,56 +11,7 @@ async function initAuth() {
     );
     window.supabaseClient = supabaseClient;
 
-    // Check initial auth state
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (session) {
-        currentUser = session.user;
-        handleAuthStateChange();
-    }
-
-    // Listen for auth changes
-    supabaseClient.auth.onAuthStateChange((event, session) => {
-        currentUser = session?.user || null;
-        handleAuthStateChange();
-    });
-
     setupFormHandlers();
-}
-
-// Handle auth state changes
-async function handleAuthStateChange() {
-    if (!currentUser) return;
-
-    try {
-        // Get user profile
-        const { data: profile, error } = await window.supabaseClient
-            .from('users')
-            .select('*')
-            .eq('id', currentUser.id)
-            .single();
-
-        if (error) throw error;
-
-        // Check email verification
-        if (!profile.email_verified) {
-            showWarning('Por favor, verifica tu correo electrónico para continuar');
-            return;
-        }
-
-        // Redirect based on role
-        const checkoutRedirect = localStorage.getItem('checkoutRedirect');
-        if (checkoutRedirect) {
-            localStorage.removeItem('checkoutRedirect');
-            window.location.href = '/cart.html';
-        } else if (profile.role === 'admin') {
-            window.location.href = '/admin.html';
-        } else {
-            window.location.href = '/';
-        }
-    } catch (error) {
-        console.error('Error fetching user profile:', error);
-        showError('Error al cargar el perfil de usuario');
-    }
 }
 
 // Setup form handlers
@@ -135,19 +88,18 @@ function setupLoginForm() {
 
             if (error) throw error;
 
-            // Check email verification
-            const { data: profile } = await window.supabaseClient
-                .from('users')
-                .select('email_verified')
-                .eq('id', data.user.id)
-                .single();
-
-            if (!profile.email_verified) {
-                showWarning('Por favor, verifica tu correo electrónico para continuar');
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
-                return;
-            }
+            showSuccess('¡Inicio de sesión exitoso!');
+            
+            // Redirect after successful login
+            setTimeout(() => {
+                const checkoutRedirect = localStorage.getItem('checkoutRedirect');
+                if (checkoutRedirect) {
+                    localStorage.removeItem('checkoutRedirect');
+                    window.location.href = '/cart.html';
+                } else {
+                    window.location.href = '/';
+                }
+            }, 1500);
 
         } catch (error) {
             showError(getErrorMessage(error));
@@ -177,14 +129,10 @@ function setupRegisterForm() {
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creando cuenta...';
             submitBtn.disabled = true;
 
-            // Register user with Supabase Auth
+            // Create user in auth
             const { data: { user }, error: signUpError } = await window.supabaseClient.auth.signUp({
                 email,
-                password,
-                options: {
-                    data: { first_name: firstName, last_name: lastName },
-                    emailRedirectTo: `${window.location.origin}/verify.html`
-                }
+                password
             });
 
             if (signUpError) throw signUpError;
@@ -197,16 +145,21 @@ function setupRegisterForm() {
                     email,
                     first_name: firstName,
                     last_name: lastName,
-                    role: 'user',
-                    email_verified: false
+                    role: 'user'
                 }]);
 
             if (profileError) throw profileError;
 
-            showSuccess('Cuenta creada. Por favor, verifica tu correo electrónico.');
+            showSuccess('¡Cuenta creada exitosamente!');
             
-            // Switch to login form
-            document.querySelector('[data-form="login"]').click();
+            // Switch to login form after successful registration
+            setTimeout(() => {
+                const loginForm = document.getElementById('loginForm');
+                const registerForm = document.getElementById('registerForm');
+                loginForm.classList.add('active');
+                registerForm.classList.remove('active');
+                document.getElementById('loginEmail').value = email;
+            }, 1500);
 
         } catch (error) {
             showError(getErrorMessage(error));
@@ -232,51 +185,7 @@ function validateRegistration(email, password, firstName, lastName) {
     return true;
 }
 
-// UI Helpers
-function showError(message) {
-    showToast(message, 'error');
-}
-
-function showSuccess(message) {
-    showToast(message, 'success');
-}
-
-function showWarning(message) {
-    showToast(message, 'warning');
-}
-
-function showToast(message, type) {
-    const toast = createToast(message, type);
-    document.body.appendChild(toast);
-    setTimeout(() => {
-        toast.classList.add('fade-out');
-        setTimeout(() => toast.remove(), 300);
-    }, 5000);
-}
-
-function createToast(message, type) {
-    const toast = document.createElement('div');
-    toast.className = `auth-toast ${type}`;
-    toast.innerHTML = `
-        <i class="fas fa-${getToastIcon(type)}"></i>
-        <span>${message}</span>
-        <button onclick="this.parentElement.remove()">
-            <i class="fas fa-times"></i>
-        </button>
-    `;
-    return toast;
-}
-
-function getToastIcon(type) {
-    switch (type) {
-        case 'error': return 'exclamation-circle';
-        case 'success': return 'check-circle';
-        case 'warning': return 'exclamation-triangle';
-        default: return 'info-circle';
-    }
-}
-
-// Error handling
+// Error message handling
 function getErrorMessage(error) {
     const errorMessages = {
         'Invalid login credentials': 'Credenciales inválidas',
@@ -288,5 +197,5 @@ function getErrorMessage(error) {
     return errorMessages[error.message] || 'Ha ocurrido un error. Por favor, inténtalo de nuevo.';
 }
 
-// Initialize auth when DOM is loaded
+// Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', initAuth);

@@ -1,4 +1,5 @@
 import { getProducts, getProductsByCategory } from './supabase.js';
+import { showSuccess, showError } from './utils/toast.js';
 
 // Initialize catalog
 async function initializeCatalog() {
@@ -7,11 +8,9 @@ async function initializeCatalog() {
     const sortFilter = document.getElementById('sortFilter');
     
     try {
-        // Initial load of all products
         const products = await getProducts();
         renderProducts(products);
         
-        // Filter products by category
         categoryFilter.addEventListener('change', async () => {
             const selectedCategory = categoryFilter.value;
             try {
@@ -25,7 +24,6 @@ async function initializeCatalog() {
             }
         });
         
-        // Sort products
         sortFilter.addEventListener('change', async () => {
             const sortValue = sortFilter.value;
             try {
@@ -65,7 +63,6 @@ function renderProducts(products) {
     
     catalogGrid.innerHTML = products.map(product => createProductCard(product)).join('');
     
-    // Add event listeners for quick view and add to cart
     setupProductInteractions();
 }
 
@@ -103,7 +100,6 @@ function createProductCard(product) {
 }
 
 function setupProductInteractions() {
-    // Quick view functionality
     document.querySelectorAll('.quick-view').forEach(button => {
         button.addEventListener('click', () => {
             const imageUrl = button.dataset.image;
@@ -111,7 +107,6 @@ function setupProductInteractions() {
         });
     });
     
-    // Add to cart functionality
     document.querySelectorAll('.add-to-cart').forEach(button => {
         button.addEventListener('click', () => {
             const productId = button.dataset.id;
@@ -134,6 +129,7 @@ async function addToCart(productId) {
         
         if (existingItem) {
             existingItem.quantity += 1;
+            showSuccess(`Se actualizó la cantidad de ${product.name}`);
         } else {
             cart.push({
                 id: product.id,
@@ -142,11 +138,11 @@ async function addToCart(productId) {
                 image: product.image_url,
                 quantity: 1
             });
+            showSuccess(`${product.name} añadido al carrito`);
         }
         
         localStorage.setItem('cart', JSON.stringify(cart));
         updateCartCount(cart);
-        showAddToCartSuccess(product.name);
         
     } catch (error) {
         console.error('Error adding to cart:', error);
@@ -163,59 +159,6 @@ function updateCartCount(cart) {
     }
 }
 
-function showAddToCartSuccess(productName) {
-    const toast = document.createElement('div');
-    toast.className = 'toast-notification';
-    toast.innerHTML = `
-        <i class="fas fa-check-circle"></i>
-        <div class="toast-content">
-            <p><strong>${productName}</strong> añadido al carrito</p>
-        </div>
-        <button class="toast-close"><i class="fas fa-times"></i></button>
-    `;
-    
-    document.body.appendChild(toast);
-    
-    setTimeout(() => toast.classList.add('show'), 100);
-    
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => document.body.removeChild(toast), 300);
-    }, 3000);
-    
-    toast.querySelector('.toast-close').addEventListener('click', () => {
-        toast.classList.remove('show');
-        setTimeout(() => document.body.removeChild(toast), 300);
-    });
-}
-
-function showError(message) {
-    const toast = document.createElement('div');
-    toast.className = 'toast-notification error';
-    toast.innerHTML = `
-        <i class="fas fa-exclamation-circle"></i>
-        <div class="toast-content">
-            <p>${message}</p>
-        </div>
-        <button class="toast-close"><i class="fas fa-times"></i></button>
-    `;
-    
-    document.body.appendChild(toast);
-    
-    setTimeout(() => toast.classList.add('show'), 100);
-    
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => document.body.removeChild(toast), 300);
-    }, 3000);
-    
-    toast.querySelector('.toast-close').addEventListener('click', () => {
-        toast.classList.remove('show');
-        setTimeout(() => document.body.removeChild(toast), 300);
-    });
-}
-
-// Image preview functionality
 function createImagePreviewModal() {
     const modal = document.createElement('div');
     modal.className = 'image-preview-modal';
@@ -257,5 +200,4 @@ function closeImagePreview() {
     }
 }
 
-// Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', initializeCatalog);
