@@ -1,7 +1,8 @@
-import Chart from '../../node_modules/chart.js/auto/auto.mjs';
-import { format } from '../../node_modules/date-fns';
-import { es } from '../../node_modules/date-fns/locale';
+import { Chart } from 'chart.js/auto';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { showSuccess, showError } from './utils/toast.js';
+
 
 // Initialize Supabase client
 let supabase;
