@@ -676,3 +676,77 @@
   color: var(--white);
   border-color: var(--primary-color);
 }
+
+/* New styles for edit and delete buttons */
+.edit-product,
+.delete-product {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.edit-product {
+  background-color: #3B82F6;
+  color: var(--white);
+  flex: 1;
+}
+
+.edit-product:hover {
+  background-color: #2563EB;
+  transform: translateY(-2px);
+}
+
+.delete-product {
+  background-color: #EF4444;
+  color: var(--white);
+  flex: 1;
+}
+
+.delete-product:hover {
+  background-color: #DC2626;
+  transform: translateY(-2px);
+}
+
+/* Revenue Table Styles */
+.revenue-table-container {
+  margin-top: 2rem;
+  overflow-x: auto;
+}
+
+.revenue-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.revenue-table th,
+.revenue-table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.revenue-table th {
+  background-color: var(--gray-50);
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+.revenue-table tr:hover {
+  background-color: var(--gray-50);
+}
+
+.revenue-table td {
+  color: var(--gray-600);
+}
+
+.revenue-table td:last-child {
+  font-weight: 500;
+  color: var(--primary-color);
+}
