@@ -82,7 +82,7 @@ async function getStats() {
 function updateStats({ userCount, totalRevenue, completedOrders, activeProducts }) {
     document.getElementById('userCount').textContent = userCount;
     document.getElementById('totalRevenue').textContent = 
-        new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'MXN' })
+        new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' })
             .format(totalRevenue);
     document.getElementById('completedOrders').textContent = completedOrders;
     document.getElementById('activeProducts').textContent = activeProducts;
@@ -104,8 +104,8 @@ function displayRevenueTable(stats) {
         .forEach(entry => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td>${new Date(entry.date).toLocaleDateString('es-ES')}</td>
-                <td>${new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'MXN' }).format(entry.total)}</td>
+                <td>${new Date(entry.date).toLocaleDateString('es-MX')}</td>
+                <td>${new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(entry.total)}</td>
             `;
             tableBody.appendChild(row);
         });
@@ -115,15 +115,10 @@ function setupChartPeriodButtons(stats) {
     const buttons = document.querySelectorAll('.chart-period');
     buttons.forEach(button => {
         button.addEventListener('click', () => {
-            // Remove active class from all buttons
             buttons.forEach(btn => btn.classList.remove('active'));
-            // Add active class to clicked button
             button.classList.add('active');
             
-            // Get selected period
             const days = parseInt(button.dataset.period);
-            
-            // Filter and display data
             const filteredData = {
                 ...stats,
                 revenueData: stats.revenueData
@@ -163,7 +158,7 @@ async function loadProducts() {
                     <p>${product.description}</p>
                     <div class="price-info">
                         <span class="price">$${product.price}</span>
-                        ${product.original_price ? `<span class="original-price">$${product.original_price}</span>` : ''}
+                        ${product.size ? `<span class="size">Talla: ${product.size}</span>` : ''}
                     </div>
                     <div class="product-actions">
                         <button class="edit-product" data-id="${product.id}">
@@ -205,7 +200,6 @@ function setupProductForm() {
     const addProductBtn = document.getElementById('addProductBtn');
     const cancelBtn = document.getElementById('cancelBtn');
     
-    // Initially hide the form
     form.style.display = 'none';
     
     addProductBtn.addEventListener('click', () => {
@@ -233,8 +227,8 @@ function setupProductForm() {
                 name: formData.get('name'),
                 description: formData.get('description'),
                 price: parseFloat(formData.get('price')),
-                original_price: parseFloat(formData.get('original_price')) || null,
                 category: formData.get('category'),
+                size: formData.get('size') || null,
                 image_url: formData.get('image_url'),
                 created_at: new Date().toISOString()
             };
@@ -276,8 +270,8 @@ async function editProduct(productId) {
         form.querySelector('#name').value = product.name;
         form.querySelector('#description').value = product.description;
         form.querySelector('#price').value = product.price;
-        form.querySelector('#original_price').value = product.original_price || '';
         form.querySelector('#category').value = product.category;
+        form.querySelector('#size').value = product.size || '';
         form.querySelector('#image_url').value = product.image_url;
         
         const submitBtn = form.querySelector('button[type="submit"]');
@@ -297,8 +291,8 @@ async function editProduct(productId) {
                     name: formData.get('name'),
                     description: formData.get('description'),
                     price: parseFloat(formData.get('price')),
-                    original_price: parseFloat(formData.get('original_price')) || null,
                     category: formData.get('category'),
+                    size: formData.get('size') || null,
                     image_url: formData.get('image_url')
                 };
                 
@@ -363,17 +357,6 @@ function setupLogout() {
                 showError('Error al cerrar sesión: ' + error.message);
             }
         });
-    }
-}
-
-async function addProduct(productData) {
-    try {
-        const { error } = await supabase.from('products').insert([productData]);
-        if (error) throw error;
-        showSuccess('Producto agregado exitosamente');
-    } catch (error) {
-        console.error('Error adding product:', error);
-        showError('Error al agregar el producto');
     }
 }
 
