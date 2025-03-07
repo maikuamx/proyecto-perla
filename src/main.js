@@ -1,112 +1,103 @@
 import { initAuthState } from './js/auth/authState.js';
-import { getProducts, getProductsByCategory } from './js/supabase.js';
+import { getProducts } from './js/supaba.js';
+import { showSuccess, showError } from './js/utils/toast.js';
 
 // Initialize auth state
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     initAuthState();
-    initializeCatalog();
+    await loadRandomProducts();
+    await loadFeaturedProducts();
 });
 
-// Initialize catalog
-async function initializeCatalog() {
-    const catalogGrid = document.querySelector('.catalog-grid');
-    const categoryFilter = document.getElementById('categoryFilter');
-    const sortFilter = document.getElementById('sortFilter');
-    
+async function loadRandomProducts() {
     try {
-        // Initial load of all products
         const products = await getProducts();
-        renderProducts(products);
-        
-        // Filter products by category
-        categoryFilter.addEventListener('change', async () => {
-            const selectedCategory = categoryFilter.value;
-            try {
-                const products = selectedCategory
-                    ? await getProductsByCategory(selectedCategory)
-                    : await getProducts();
-                renderProducts(products);
-            } catch (error) {
-                console.error('Error filtering products:', error);
-                showError('Error al filtrar productos');
-            }
-        });
-        
-        // Sort products
-        sortFilter.addEventListener('change', async () => {
-            const sortValue = sortFilter.value;
-            try {
-                let products = await getProducts();
-                
-                switch(sortValue) {
-                    case 'price-asc':
-                        products.sort((a, b) => a.price - b.price);
-                        break;
-                    case 'price-desc':
-                        products.sort((a, b) => b.price - a.price);
-                        break;
-                    case 'newest':
-                        products.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-                        break;
-                }
-                
-                renderProducts(products);
-            } catch (error) {
-                console.error('Error sorting products:', error);
-                showError('Error al ordenar productos');
-            }
-        });
-    } catch (error) {
-        console.error('Error loading products:', error);
-        showError('Error al cargar productos');
-    }
-}
+        if (!products || products.length === 0) {
+            document.querySelector('.products-grid').innerHTML = '<p class="no-products">No hay productos disponibles.</p>';
+            return;
+        }
 
-function renderProducts(products) {
-    const catalogGrid = document.querySelector('.catalog-grid');
-    
-    if (!products.length) {
-        catalogGrid.innerHTML = '<p class="no-products">No hay productos disponibles.</p>';
-        return;
-    }
-    
-    catalogGrid.innerHTML = products.map(product => createProductCard(product)).join('');
-    
-    // Add event listeners for quick view and add to cart
-    setupProductInteractions();
-}
-
-function createProductCard(product) {
-    const discount = product.original_price 
-        ? Math.round(((product.original_price - product.price) / product.original_price) * 100)
-        : 0;
-    
-    return `
-        <div class="product-card">
-            ${product.badge ? `<span class="product-badge">${product.badge}</span>` : ''}
-            <img src="${product.image_url}" alt="${product.name}" class="product-image">
-            <div class="product-details">
-                <div class="product-category">${product.category}</div>
-                <h3 class="product-title">${product.name}</h3>
-                <div class="product-price-container">
-                    <span class="product-price">$${product.price.toFixed(2)}</span>
-                    ${product.original_price ? `
-                        <span class="product-original-price">$${product.original_price.toFixed(2)}</span>
-                        <span class="product-discount">-${discount}%</span>
-                    ` : ''}
-                </div>
-                <div class="product-actions">
-                    <button class="add-to-cart" data-id="${product.id}">
-                        <i class="fas fa-shopping-cart"></i>
-                        Añadir al carrito
-                    </button>
-                    <button class="quick-view" title="Vista rápida" data-image="${product.image_url}">
-                        <i class="fas fa-eye"></i>
-                    </button>
+        // Get 6 random products
+        const randomProducts = getRandomProducts(products, 6);
+        const productsGrid = document.querySelector('.products-grid');
+        
+        productsGrid.innerHTML = randomProducts.map(product => `
+            <div class="product-card">
+                <img src="${product.image_url}" alt="${product.name}" class="product-image">
+                <div class="product-details">
+                    <div class="product-category">${product.category}</div>
+                    <h3 class="product-title">${product.name}</h3>
+                    <div class="product-price-container">
+                        <span class="product-price">$${product.price.toFixed(2)}</span>
+                        ${product.size ? `<span class="product-size">Talla: ${product.size}</span>` : ''}
+                    </div>
+                    <div class="product-actions">
+                        <button class="add-to-cart" data-id="${product.id}">
+                            <i class="fas fa-shopping-cart"></i>
+                            Añadir al carrito
+                        </button>
+                        <button class="quick-view" title="Vista rápida" data-image="${product.image_url}">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
-    `;
+        `).join('');
+
+        setupProductInteractions();
+    } catch (error) {
+        console.error('Error loading random products:', error);
+        showError('Error al cargar los productos');
+    }
+}
+
+async function loadFeaturedProducts() {
+    try {
+        const products = await getProducts();
+        if (!products || products.length === 0) {
+            document.querySelector('.featured-products-grid').innerHTML = '<p class="no-products">No hay productos destacados disponibles.</p>';
+            return;
+        }
+
+        // Get 3 random products for featured section
+        const featuredProducts = getRandomProducts(products, 3);
+        const featuredGrid = document.querySelector('.featured-products-grid');
+        
+        featuredGrid.innerHTML = featuredProducts.map(product => `
+            <div class="featured-product-card">
+                <div class="featured-badge">Destacado</div>
+                <img src="${product.image_url}" alt="${product.name}" class="featured-product-image">
+                <div class="featured-product-details">
+                    <div class="product-category">${product.category}</div>
+                    <h3 class="product-title">${product.name}</h3>
+                    <p class="product-description">${product.description || ''}</p>
+                    <div class="product-price-container">
+                        <span class="product-price">$${product.price.toFixed(2)}</span>
+                        ${product.size ? `<span class="product-size">Talla: ${product.size}</span>` : ''}
+                    </div>
+                    <div class="product-actions">
+                        <button class="add-to-cart" data-id="${product.id}">
+                            <i class="fas fa-shopping-cart"></i>
+                            Añadir al carrito
+                        </button>
+                        <button class="quick-view" title="Vista rápida" data-image="${product.image_url}">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        setupProductInteractions();
+    } catch (error) {
+        console.error('Error loading featured products:', error);
+        showError('Error al cargar los productos destacados');
+    }
+}
+
+function getRandomProducts(products, count) {
+    const shuffled = [...products].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, Math.min(count, shuffled.length));
 }
 
 function setupProductInteractions() {
@@ -141,6 +132,7 @@ async function addToCart(productId) {
         
         if (existingItem) {
             existingItem.quantity += 1;
+            showSuccess(`Se actualizó la cantidad de ${product.name}`);
         } else {
             cart.push({
                 id: product.id,
@@ -149,11 +141,11 @@ async function addToCart(productId) {
                 image: product.image_url,
                 quantity: 1
             });
+            showSuccess(`${product.name} añadido al carrito`);
         }
         
         localStorage.setItem('cart', JSON.stringify(cart));
         updateCartCount(cart);
-        showAddToCartSuccess(product.name);
         
     } catch (error) {
         console.error('Error adding to cart:', error);
@@ -170,59 +162,6 @@ function updateCartCount(cart) {
     }
 }
 
-function showAddToCartSuccess(productName) {
-    const toast = document.createElement('div');
-    toast.className = 'toast-notification';
-    toast.innerHTML = `
-        <i class="fas fa-check-circle"></i>
-        <div class="toast-content">
-            <p><strong>${productName}</strong> añadido al carrito</p>
-        </div>
-        <button class="toast-close"><i class="fas fa-times"></i></button>
-    `;
-    
-    document.body.appendChild(toast);
-    
-    setTimeout(() => toast.classList.add('show'), 100);
-    
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => document.body.removeChild(toast), 300);
-    }, 3000);
-    
-    toast.querySelector('.toast-close').addEventListener('click', () => {
-        toast.classList.remove('show');
-        setTimeout(() => document.body.removeChild(toast), 300);
-    });
-}
-
-function showError(message) {
-    const toast = document.createElement('div');
-    toast.className = 'toast-notification error';
-    toast.innerHTML = `
-        <i class="fas fa-exclamation-circle"></i>
-        <div class="toast-content">
-            <p>${message}</p>
-        </div>
-        <button class="toast-close"><i class="fas fa-times"></i></button>
-    `;
-    
-    document.body.appendChild(toast);
-    
-    setTimeout(() => toast.classList.add('show'), 100);
-    
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => document.body.removeChild(toast), 300);
-    }, 3000);
-    
-    toast.querySelector('.toast-close').addEventListener('click', () => {
-        toast.classList.remove('show');
-        setTimeout(() => document.body.removeChild(toast), 300);
-    });
-}
-
-// Image preview functionality
 function createImagePreviewModal() {
     const modal = document.createElement('div');
     modal.className = 'image-preview-modal';
