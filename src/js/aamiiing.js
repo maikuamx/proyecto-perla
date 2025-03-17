@@ -33,11 +33,85 @@ async function initAdminPanel() {
         initializeCharts(stats);
         setupProductForm();
         setupLogout();
+        setupImageUpload();
         
     } catch (error) {
         console.error('Error initializing admin panel:', error);
         showError('Error al inicializar el panel de administración');
     }
+}
+
+// Image handling functions
+function setupImageUpload() {
+    const addImageBtn = document.getElementById('addImageBtn');
+    const imageInput = document.getElementById('imageInput');
+    const imagePreviewGrid = document.getElementById('imagePreviewGrid');
+    const maxImages = 5;
+    let uploadedImages = [];
+
+    addImageBtn.addEventListener('click', () => {
+        imageInput.click();
+    });
+
+    imageInput.addEventListener('change', async (e) => {
+        const files = Array.from(e.target.files);
+        
+        if (uploadedImages.length + files.length > maxImages) {
+            showError(`Máximo ${maxImages} imágenes permitidas`);
+            return;
+        }
+
+        for (const file of files) {
+            if (!file.type.startsWith('image/')) {
+                showError('Solo se permiten archivos de imagen');
+                continue;
+            }
+
+            try {
+                const base64 = await convertToBase64(file);
+                uploadedImages.push(base64);
+                addImagePreview(base64);
+            } catch (error) {
+                console.error('Error processing image:', error);
+                showError('Error al procesar la imagen');
+            }
+        }
+
+        if (uploadedImages.length >= maxImages) {
+            addImageBtn.disabled = true;
+        }
+    });
+
+    function addImagePreview(base64) {
+        const preview = document.createElement('div');
+        preview.className = 'image-preview';
+        preview.innerHTML = `
+            <img src="${base64}" alt="Preview">
+            <button type="button" class="remove-image">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+
+        preview.querySelector('.remove-image').addEventListener('click', () => {
+            const index = uploadedImages.indexOf(base64);
+            if (index > -1) {
+                uploadedImages.splice(index, 1);
+                preview.remove();
+                addImageBtn.disabled = false;
+            }
+        });
+
+        imagePreviewGrid.appendChild(preview);
+    }
+}
+
+function convertToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+        reader.readAsDataURL(file);
+    });
 }
 
 async function getStats() {
@@ -152,7 +226,26 @@ async function loadProducts() {
         
         productsList.innerHTML = products.map(product => `
             <div class="product-card" data-id="${product.id}">
-                <img src="${product.image_url}" alt="${product.name}" class="product-image">
+                <div class="product-images">
+                    <div class="image-gallery">
+                        ${product.images.map(image => `
+                            <img src="${image}" alt="${product.name}">
+                        `).join('')}
+                    </div>
+                    ${product.images.length > 1 ? `
+                        <div class="gallery-nav">
+                            ${product.images.map((_, index) => `
+                                <span class="gallery-dot ${index === 0 ? 'active' : ''}" data-index="${index}"></span>
+                            `).join('')}
+                        </div>
+                        <button class="gallery-arrow gallery-prev">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="gallery-arrow gallery-next">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    ` : ''}
+                </div>
                 <div class="product-details">
                     <h3>${product.name}</h3>
                     <p>${product.description}</p>
@@ -173,10 +266,50 @@ async function loadProducts() {
         `).join('');
         
         setupProductActions();
+        setupImageGalleries();
     } catch (error) {
         console.error('Error loading products:', error);
         showError('Error al cargar los productos');
     }
+}
+
+function setupImageGalleries() {
+    document.querySelectorAll('.product-images').forEach(gallery => {
+        if (gallery.querySelector('.image-gallery').children.length <= 1) return;
+
+        let currentIndex = 0;
+        const images = gallery.querySelectorAll('img');
+        const dots = gallery.querySelectorAll('.gallery-dot');
+        const prevBtn = gallery.querySelector('.gallery-prev');
+        const nextBtn = gallery.querySelector('.gallery-next');
+
+        function updateGallery() {
+            const offset = currentIndex * -100;
+            gallery.querySelector('.image-gallery').style.transform = `translateX(${offset}%)`;
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentIndex);
+            });
+        }
+
+        if (prevBtn && nextBtn) {
+            prevBtn.addEventListener('click', () => {
+                currentIndex = (currentIndex - 1 + images.length) % images.length;
+                updateGallery();
+            });
+
+            nextBtn.addEventListener('click', () => {
+                currentIndex = (currentIndex + 1) % images.length;
+                updateGallery();
+            });
+        }
+
+        dots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                currentIndex = index;
+                updateGallery();
+            });
+        });
+    });
 }
 
 function setupProductActions() {
@@ -205,12 +338,14 @@ function setupProductForm() {
     addProductBtn.addEventListener('click', () => {
         form.style.display = 'block';
         form.reset();
+        document.getElementById('imagePreviewGrid').innerHTML = '';
         form.scrollIntoView({ behavior: 'smooth' });
     });
     
     cancelBtn.addEventListener('click', () => {
         form.style.display = 'none';
         form.reset();
+        document.getElementById('imagePreviewGrid').innerHTML = '';
     });
     
     form.addEventListener('submit', async (e) => {
@@ -223,13 +358,19 @@ function setupProductForm() {
         
         try {
             const formData = new FormData(form);
+            const images = Array.from(document.querySelectorAll('.image-preview img')).map(img => img.src);
+            
+            if (images.length === 0) {
+                throw new Error('Debe agregar al menos una imagen');
+            }
+            
             const productData = {
                 name: formData.get('name'),
                 description: formData.get('description'),
                 price: parseFloat(formData.get('price')),
                 category: formData.get('category'),
                 size: formData.get('size') || null,
-                image_url: formData.get('image_url'),
+                images: images,
                 created_at: new Date().toISOString()
             };
             
@@ -242,6 +383,7 @@ function setupProductForm() {
             showSuccess('Producto agregado exitosamente');
             form.reset();
             form.style.display = 'none';
+            document.getElementById('imagePreviewGrid').innerHTML = '';
             await loadProducts();
             
         } catch (error) {
@@ -272,12 +414,26 @@ async function editProduct(productId) {
         form.querySelector('#price').value = product.price;
         form.querySelector('#category').value = product.category;
         form.querySelector('#size').value = product.size || '';
-        form.querySelector('#image_url').value = product.image_url;
+        
+        // Load existing images
+        const imagePreviewGrid = document.getElementById('imagePreviewGrid');
+        imagePreviewGrid.innerHTML = '';
+        product.images.forEach(image => {
+            const preview = document.createElement('div');
+            preview.className = 'image-preview';
+            preview.innerHTML = `
+                <img src="${image}" alt="Preview">
+                <button type="button" class="remove-image">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            imagePreviewGrid.appendChild(preview);
+        });
         
         const submitBtn = form.querySelector('button[type="submit"]');
         submitBtn.innerHTML = '<i class="fas fa-save"></i> Actualizar Producto';
         
-        form.scrollIntoView({ behavior: 'smooth' });
+        form.scrollIntoView({ behavior: 'smooth'});
         
         form.onsubmit = async (e) => {
             e.preventDefault();
@@ -287,13 +443,19 @@ async function editProduct(productId) {
             
             try {
                 const formData = new FormData(form);
+                const images = Array.from(document.querySelectorAll('.image-preview img')).map(img => img.src);
+                
+                if (images.length === 0) {
+                    throw new Error('Debe agregar al menos una imagen');
+                }
+                
                 const updatedData = {
                     name: formData.get('name'),
                     description: formData.get('description'),
                     price: parseFloat(formData.get('price')),
                     category: formData.get('category'),
                     size: formData.get('size') || null,
-                    image_url: formData.get('image_url')
+                    images: images
                 };
                 
                 const { error } = await supabase
@@ -306,6 +468,7 @@ async function editProduct(productId) {
                 showSuccess('Producto actualizado exitosamente');
                 form.reset();
                 form.style.display = 'none';
+                document.getElementById('imagePreviewGrid').innerHTML = '';
                 submitBtn.innerHTML = '<i class="fas fa-plus"></i> Agregar Producto';
                 form.onsubmit = null;
                 await loadProducts();

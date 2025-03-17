@@ -21,9 +21,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="./admiinn.css">
+    
+    <!-- Add Supabase JS before your scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="./admiinng.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <div class="admin-container">
@@ -204,8 +206,18 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="image_url">URL de la Imagen</label>
-                        <input type="url" id="image_url" name="image_url" required>
+                        <label>Imágenes del Producto</label>
+                        <div class="image-upload-container">
+                            <div class="image-preview-grid" id="imagePreviewGrid"></div>
+                            <div class="image-upload-actions">
+                                <input type="file" id="imageInput" accept="image/*" multiple style="display: none">
+                                <button type="button" class="admin-btn secondary" id="addImageBtn">
+                                    <i class="fas fa-plus"></i>
+                                    Agregar Imágenes
+                                </button>
+                                <p class="image-upload-help">Formatos aceptados: JPG, PNG. Máximo 5 imágenes.</p>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="form-actions">
@@ -225,7 +237,7 @@
     </div>
 
     <script src="/src/js/utils/toast.js"></script>
-    <script type="module" src="/src/js/supaba.js"></script>
-    <script type="module" src="/src/js/aamiiin.js"></script>
+    <script src="/src/js/supabase.js"></script>
+    <script type="module" src="/src/js/aamiiing.js"></script>
 </body>
 </html>
