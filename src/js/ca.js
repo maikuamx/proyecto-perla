@@ -1,4 +1,4 @@
-import { getProducts, getProductsByCategory } from './supaaa.js';
+import { getProducts, getProductsByCategory } from './supabase.js';
 import { showSuccess, showError } from './utils/toast.js';
 
 const ITEMS_PER_PAGE = 8;
@@ -147,7 +147,7 @@ function createProductCard(product) {
                 <div class="product-price-container">
                     <span class="product-price">$${product.price.toFixed(2)}</span>
                     ${product.original_price ? `
-                        <span class="product-original-price">€${product.original_price.toFixed(2)}</span>
+                        <span class="product-original-price">$${product.original_price.toFixed(2)}</span>
                         <span class="product-discount">-${discount}%</span>
                     ` : ''}
                 </div>
@@ -183,19 +183,33 @@ function setupProductInteractions() {
 
 async function addToCart(productId) {
     try {
-        const product = currentProducts.find(p => p.id === productId);
+        // Get product details including stock quantity
+        const { data: product, error } = await window.supabaseClient
+            .from('products')
+            .select('*')
+            .eq('id', productId)
+            .single();
         
-        if (!product) {
-            throw new Error('Producto no encontrado');
-        }
+        if (error) throw error;
+        if (!product) throw new Error('Producto no encontrado');
         
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
         const existingItem = cart.find(item => item.id === productId);
         
         if (existingItem) {
+            // Check if adding one more exceeds stock
+            if (existingItem.quantity + 1 > product.stock_quantity) {
+                showError('No hay suficiente stock disponible');
+                return;
+            }
             existingItem.quantity += 1;
             showSuccess(`Se actualizó la cantidad de ${product.name}`);
         } else {
+            // Check if there's stock available
+            if (product.stock_quantity < 1) {
+                showError('Producto agotado');
+                return;
+            }
             cart.push({
                 id: product.id,
                 name: product.name,
@@ -207,6 +221,7 @@ async function addToCart(productId) {
         }
         
         localStorage.setItem('cart', JSON.stringify(cart));
+        await window.saveCart(cart);
         updateCartCount(cart);
         
     } catch (error) {

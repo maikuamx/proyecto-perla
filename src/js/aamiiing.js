@@ -252,6 +252,7 @@ async function loadProducts() {
                     <div class="price-info">
                         <span class="price">$${product.price}</span>
                         ${product.size ? `<span class="size">Talla: ${product.size}</span>` : ''}
+                        <span class="stock">Stock: ${product.stock_quantity || 0}</span>
                     </div>
                     <div class="product-actions">
                         <button class="edit-product" data-id="${product.id}">
@@ -328,12 +329,87 @@ function setupProductActions() {
     });
 }
 
+async function handleProductSubmit(e, form, isEdit = false) {
+    e.preventDefault();
+    
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+    submitBtn.disabled = true;
+    
+    try {
+        const formData = new FormData(form);
+        const images = Array.from(document.querySelectorAll('.image-preview img')).map(img => img.src);
+        
+        if (images.length === 0) {
+            throw new Error('Debe agregar al menos una imagen');
+        }
+        
+        const stockQuantity = parseInt(formData.get('stock_quantity'));
+        if (isNaN(stockQuantity) || stockQuantity < 0) {
+            throw new Error('La cantidad de stock debe ser un número válido mayor o igual a 0');
+        }
+        
+        const productData = {
+            name: formData.get('name'),
+            description: formData.get('description'),
+            price: parseFloat(formData.get('price')),
+            category: formData.get('category'),
+            size: formData.get('size') || null,
+            stock_quantity: stockQuantity,
+            images: images,
+            created_at: new Date().toISOString()
+        };
+        
+        let error;
+        
+        if (isEdit) {
+            const productId = form.dataset.productId;
+            ({ error } = await supabase
+                .from('products')
+                .update(productData)
+                .eq('id', productId));
+        } else {
+            ({ error } = await supabase
+                .from('products')
+                .insert([productData]));
+        }
+        
+        if (error) throw error;
+        
+        showSuccess(isEdit ? 'Producto actualizado exitosamente' : 'Producto agregado exitosamente');
+        form.reset();
+        form.style.display = 'none';
+        document.getElementById('imagePreviewGrid').innerHTML = '';
+        await loadProducts();
+        
+    } catch (error) {
+        console.error('Error saving product:', error);
+        showError('Error al guardar el producto: ' + error.message);
+    } finally {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    }
+}
+
 function setupProductForm() {
     const form = document.getElementById('addProductForm');
     const addProductBtn = document.getElementById('addProductBtn');
     const cancelBtn = document.getElementById('cancelBtn');
     
     form.style.display = 'none';
+    
+    // Add stock quantity field to form
+    const stockQuantityField = `
+        <div class="form-group">
+            <label for="stock_quantity">Cantidad en Stock</label>
+            <input type="number" id="stock_quantity" name="stock_quantity" min="0" required>
+        </div>
+    `;
+    
+    // Insert stock quantity field before the images section
+    const imagesSection = form.querySelector('.form-group:last-of-type');
+    imagesSection.insertAdjacentHTML('beforebegin', stockQuantityField);
     
     addProductBtn.addEventListener('click', () => {
         form.style.display = 'block';
@@ -348,52 +424,7 @@ function setupProductForm() {
         document.getElementById('imagePreviewGrid').innerHTML = '';
     });
     
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const submitBtn = form.querySelector('button[type="submit"]');
-        const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
-        submitBtn.disabled = true;
-        
-        try {
-            const formData = new FormData(form);
-            const images = Array.from(document.querySelectorAll('.image-preview img')).map(img => img.src);
-            
-            if (images.length === 0) {
-                throw new Error('Debe agregar al menos una imagen');
-            }
-            
-            const productData = {
-                name: formData.get('name'),
-                description: formData.get('description'),
-                price: parseFloat(formData.get('price')),
-                category: formData.get('category'),
-                size: formData.get('size') || null,
-                images: images,
-                created_at: new Date().toISOString()
-            };
-            
-            const { error } = await supabase
-                .from('products')
-                .insert([productData]);
-            
-            if (error) throw error;
-            
-            showSuccess('Producto agregado exitosamente');
-            form.reset();
-            form.style.display = 'none';
-            document.getElementById('imagePreviewGrid').innerHTML = '';
-            await loadProducts();
-            
-        } catch (error) {
-            console.error('Error adding product:', error);
-            showError('Error al agregar el producto: ' + error.message);
-        } finally {
-            submitBtn.innerHTML = originalText;
-            submitBtn.disabled = false;
-        }
-    });
+    form.addEventListener('submit', (e) => handleProductSubmit(e, form, false));
 }
 
 async function editProduct(productId) {
@@ -408,12 +439,14 @@ async function editProduct(productId) {
         
         const form = document.getElementById('addProductForm');
         form.style.display = 'block';
+        form.dataset.productId = productId;
         
         form.querySelector('#name').value = product.name;
         form.querySelector('#description').value = product.description;
         form.querySelector('#price').value = product.price;
         form.querySelector('#category').value = product.category;
         form.querySelector('#size').value = product.size || '';
+        form.querySelector('#stock_quantity').value = product.stock_quantity || 0;
         
         // Load existing images
         const imagePreviewGrid = document.getElementById('imagePreviewGrid');
@@ -433,53 +466,10 @@ async function editProduct(productId) {
         const submitBtn = form.querySelector('button[type="submit"]');
         submitBtn.innerHTML = '<i class="fas fa-save"></i> Actualizar Producto';
         
-        form.scrollIntoView({ behavior: 'smooth'});
+        form.scrollIntoView({ behavior: 'smooth' });
         
-        form.onsubmit = async (e) => {
-            e.preventDefault();
-            
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Actualizando...';
-            submitBtn.disabled = true;
-            
-            try {
-                const formData = new FormData(form);
-                const images = Array.from(document.querySelectorAll('.image-preview img')).map(img => img.src);
-                
-                if (images.length === 0) {
-                    throw new Error('Debe agregar al menos una imagen');
-                }
-                
-                const updatedData = {
-                    name: formData.get('name'),
-                    description: formData.get('description'),
-                    price: parseFloat(formData.get('price')),
-                    category: formData.get('category'),
-                    size: formData.get('size') || null,
-                    images: images
-                };
-                
-                const { error } = await supabase
-                    .from('products')
-                    .update(updatedData)
-                    .eq('id', productId);
-                    
-                if (error) throw error;
-                
-                showSuccess('Producto actualizado exitosamente');
-                form.reset();
-                form.style.display = 'none';
-                document.getElementById('imagePreviewGrid').innerHTML = '';
-                submitBtn.innerHTML = '<i class="fas fa-plus"></i> Agregar Producto';
-                form.onsubmit = null;
-                await loadProducts();
-                
-            } catch (error) {
-                console.error('Error updating product:', error);
-                showError('Error al actualizar el producto: ' + error.message);
-            } finally {
-                submitBtn.disabled = false;
-            }
-        };
+        form.onsubmit = (e) => handleProductSubmit(e, form, true);
+        
     } catch (error) {
         console.error('Error loading product:', error);
         showError('Error al cargar el producto');
