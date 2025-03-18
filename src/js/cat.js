@@ -1,6 +1,11 @@
 import { getProducts, getProductsByCategory } from './supaaa.js';
 import { showSuccess, showError } from './utils/toast.js';
 
+const ITEMS_PER_PAGE = 9;
+let currentPage = 1;
+let totalPages = 1;
+let currentProducts = [];
+
 // Initialize catalog
 async function initializeCatalog() {
     const catalogGrid = document.querySelector('.catalog-grid');
@@ -9,7 +14,10 @@ async function initializeCatalog() {
     
     try {
         const products = await getProducts();
-        renderProducts(products);
+        currentProducts = products;
+        totalPages = Math.ceil(products.length / ITEMS_PER_PAGE);
+        renderProducts(getCurrentPageProducts());
+        setupPagination();
         
         categoryFilter.addEventListener('change', async () => {
             const selectedCategory = categoryFilter.value;
@@ -17,7 +25,11 @@ async function initializeCatalog() {
                 const products = selectedCategory
                     ? await getProductsByCategory(selectedCategory)
                     : await getProducts();
-                renderProducts(products);
+                currentProducts = products;
+                currentPage = 1;
+                totalPages = Math.ceil(products.length / ITEMS_PER_PAGE);
+                renderProducts(getCurrentPageProducts());
+                setupPagination();
             } catch (error) {
                 console.error('Error filtering products:', error);
                 showError('Error al filtrar productos');
@@ -27,7 +39,7 @@ async function initializeCatalog() {
         sortFilter.addEventListener('change', async () => {
             const sortValue = sortFilter.value;
             try {
-                let products = await getProducts();
+                let products = [...currentProducts];
                 
                 switch(sortValue) {
                     case 'price-asc':
@@ -41,7 +53,10 @@ async function initializeCatalog() {
                         break;
                 }
                 
-                renderProducts(products);
+                currentProducts = products;
+                currentPage = 1;
+                renderProducts(getCurrentPageProducts());
+                setupPagination();
             } catch (error) {
                 console.error('Error sorting products:', error);
                 showError('Error al ordenar productos');
@@ -53,6 +68,58 @@ async function initializeCatalog() {
     }
 }
 
+function getCurrentPageProducts() {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return currentProducts.slice(startIndex, endIndex);
+}
+
+function setupPagination() {
+    const paginationNumbers = document.querySelector('.pagination-numbers');
+    const prevBtn = document.querySelector('.pagination-btn:first-child');
+    const nextBtn = document.querySelector('.pagination-btn:last-child');
+    
+    // Clear existing pagination
+    paginationNumbers.innerHTML = '';
+    
+    // Add page numbers
+    for (let i = 1; i <= totalPages; i++) {
+        const button = document.createElement('button');
+        button.textContent = i;
+        button.classList.toggle('active', i === currentPage);
+        button.addEventListener('click', () => {
+            currentPage = i;
+            renderProducts(getCurrentPageProducts());
+            setupPagination();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        paginationNumbers.appendChild(button);
+    }
+    
+    // Update prev/next buttons
+    prevBtn.disabled = currentPage === 1;
+    nextBtn.disabled = currentPage === totalPages;
+    
+    // Add event listeners for prev/next
+    prevBtn.onclick = () => {
+        if (currentPage > 1) {
+            currentPage--;
+            renderProducts(getCurrentPageProducts());
+            setupPagination();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+    
+    nextBtn.onclick = () => {
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderProducts(getCurrentPageProducts());
+            setupPagination();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+}
+
 function renderProducts(products) {
     const catalogGrid = document.querySelector('.catalog-grid');
     
@@ -62,7 +129,6 @@ function renderProducts(products) {
     }
     
     catalogGrid.innerHTML = products.map(product => createProductCard(product)).join('');
-    
     setupProductInteractions();
 }
 
@@ -74,14 +140,14 @@ function createProductCard(product) {
     return `
         <div class="product-card">
             ${product.badge ? `<span class="product-badge">${product.badge}</span>` : ''}
-            <img src="${product.image_url}" alt="${product.name}" class="product-image">
+            <img src="${product.images[0]}" alt="${product.name}" class="product-image">
             <div class="product-details">
                 <div class="product-category">${product.category}</div>
                 <h3 class="product-title">${product.name}</h3>
                 <div class="product-price-container">
-                    <span class="product-price">${product.price.toFixed(2)}</span>
+                    <span class="product-price">€${product.price.toFixed(2)}</span>
                     ${product.original_price ? `
-                        <span class="product-original-price">$${product.original_price.toFixed(2)}</span>
+                        <span class="product-original-price">€${product.original_price.toFixed(2)}</span>
                         <span class="product-discount">-${discount}%</span>
                     ` : ''}
                 </div>
@@ -90,20 +156,20 @@ function createProductCard(product) {
                         <i class="fas fa-shopping-cart"></i>
                         Añadir al carrito
                     </button>
-                    <button class="quick-view" title="Vista rápida" data-image="${product.image_url}">
+                    <button class="quick-view" title="Vista rápida" data-images='${JSON.stringify(product.images)}'>
                         <i class="fas fa-eye"></i>
                     </button>
                 </div>
             </div>
         </div>
-    `;$
+    `;
 }
 
 function setupProductInteractions() {
     document.querySelectorAll('.quick-view').forEach(button => {
         button.addEventListener('click', () => {
-            const imageUrl = button.dataset.image;
-            showImagePreview(imageUrl);
+            const images = JSON.parse(button.dataset.images);
+            showImagePreview(images[0]); // Por ahora mostramos solo la primera imagen
         });
     });
     
@@ -117,8 +183,7 @@ function setupProductInteractions() {
 
 async function addToCart(productId) {
     try {
-        const products = await getProducts();
-        const product = products.find(p => p.id === productId);
+        const product = currentProducts.find(p => p.id === productId);
         
         if (!product) {
             throw new Error('Producto no encontrado');
@@ -135,7 +200,7 @@ async function addToCart(productId) {
                 id: product.id,
                 name: product.name,
                 price: product.price,
-                image: product.image_url,
+                image: product.images[0],
                 quantity: 1
             });
             showSuccess(`${product.name} añadido al carrito`);
