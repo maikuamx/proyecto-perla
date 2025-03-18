@@ -1,5 +1,5 @@
 import { showSuccess, showError } from './utils/toast.js';
-import Cookies from 'js-cookie';
+import Cookies from '../../node_modules/js-cookie/index.js';
 
 // Auth state management
 let currentUser = null;
