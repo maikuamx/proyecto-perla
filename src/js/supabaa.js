@@ -1,12 +1,38 @@
 // API URL for backend communication
 const API_URL = 'https://proyecto-perla.onrender.com/api';
+
 // Initialize Supabase client
 let supabaseClient = null;
+
+// Load Supabase script dynamically
+async function loadSupabaseScript() {
+    return new Promise((resolve, reject) => {
+        if (window.supabase) {
+            resolve();
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+        script.async = true;
+        script.onload = resolve;
+        script.onerror = () => reject(new Error('Failed to load Supabase script'));
+        document.head.appendChild(script);
+    });
+}
 
 // Initialize Supabase client
 window.initSupabase = async function() {
     if (!supabaseClient) {
         try {
+            // Ensure Supabase script is loaded
+            await loadSupabaseScript();
+            
+            // Wait for window.supabase to be available
+            if (!window.supabase) {
+                throw new Error('Supabase not available');
+            }
+
             // Get Supabase configuration from server
             const response = await fetch(`${API_URL}/supabase-config`);
             if (!response.ok) {
