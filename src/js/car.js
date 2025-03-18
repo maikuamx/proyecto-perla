@@ -1,12 +1,15 @@
 import { showSuccess, showError, showInfo } from './utils/toast.js';
 
+
+const API_URL = 'https://proyecto-perla.onrender.com/api';
+
 // Initialize Stripe
 let stripe;
 let elements;
 let paymentElement;
 
 async function initializeStripe() {
-    const response = await fetch('/api/stripe-config');
+    const response = await fetch(`${API_URL}/stripe-config`);
     const { publishableKey } = await response.json();
     stripe = await loadStripe(publishableKey);
     const clientSecret = await createPaymentIntent();
@@ -35,7 +38,7 @@ async function createPaymentIntent() {
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
     const total = calculateTotal(cart);
 
-    const response = await fetch('/api/create-payment-intent', {
+    const response = await fetch(`${API_URL}/create-payment-intent`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
