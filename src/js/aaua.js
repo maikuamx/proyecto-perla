@@ -1,5 +1,4 @@
 import { showSuccess, showError } from './utils/toast.js';
-import Cookies from 'js-cookie';
 import { createUserMenu } from './components/userMenu.js';
 
 // Auth state management
