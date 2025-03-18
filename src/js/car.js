@@ -1,6 +1,5 @@
 import { showSuccess, showError, showInfo } from './utils/toast.js';
 
-
 const API_URL = 'https://proyecto-perla.onrender.com/api';
 
 // Initialize Stripe
@@ -11,7 +10,7 @@ let paymentElement;
 async function initializeStripe() {
     const response = await fetch(`${API_URL}/stripe-config`);
     const { publishableKey } = await response.json();
-    stripe = await loadStripe(publishableKey);
+    stripe = Stripe(publishableKey);
     const clientSecret = await createPaymentIntent();
     
     elements = stripe.elements({
@@ -45,7 +44,7 @@ async function createPaymentIntent() {
         },
         body: JSON.stringify({
             amount: Math.round(total * 100),
-            currency: 'eur'
+            currency: 'usd'
         })
     });
 
