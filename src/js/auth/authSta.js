@@ -12,26 +12,39 @@ export async function initAuthState() {
             throw new Error('Failed to initialize Supabase client');
         }
 
-        // Listen for auth state changes
-        supabaseClient.auth.onAuthStateChange(handleAuthStateChange);
-        
-        // Check initial auth state
-        const { data: { user } } = await supabaseClient.auth.getUser();
-        if (user) {
-            await updateUIForAuthenticatedUser(user);
+        // Check for existing session in cookies
+        const session = Cookies.get('supabase-session');
+        if (session) {
+            const { data: { user }, error } = await supabaseClient.auth.getUser(session);
+            if (!error && user) {
+                await updateUIForAuthenticatedUser(user);
+            } else {
+                Cookies.remove('supabase-session');
+                updateUIForUnauthenticatedUser();
+            }
         } else {
             updateUIForUnauthenticatedUser();
         }
+
+        // Listen for auth state changes
+        supabaseClient.auth.onAuthStateChange(handleAuthStateChange);
     } catch (error) {
         console.error('Error initializing auth state:', error);
+        updateUIForUnauthenticatedUser();
     }
 }
 
 async function handleAuthStateChange(event, session) {
     if (event === 'SIGNED_IN') {
+        // Save session in cookies
+        Cookies.set('supabase-session', session.access_token, { expires: 7 }); // 7 days expiry
         await updateUIForAuthenticatedUser(session.user);
         showSuccess('¡Bienvenido de nuevo!');
+        
+        // Sync cart with server
+        await syncCartWithServer();
     } else if (event === 'SIGNED_OUT') {
+        Cookies.remove('supabase-session');
         updateUIForUnauthenticatedUser();
         showSuccess('Has cerrado sesión correctamente');
     }
@@ -83,9 +96,6 @@ async function updateUIForAuthenticatedUser(user) {
                 }
             });
         }
-        
-        // Update cart if available
-        await syncCartWithServer();
     } catch (error) {
         console.error('Error updating UI for authenticated user:', error);
     }
@@ -110,15 +120,32 @@ function updateUIForUnauthenticatedUser() {
 async function syncCartWithServer() {
     try {
         const localCart = JSON.parse(localStorage.getItem('cart')) || [];
+        const { data: serverCart } = await window.getCart();
+
         if (localCart.length > 0) {
-            await window.saveCart(localCart);
-        } else {
-            const serverCart = await window.getCart();
-            if (serverCart.items?.length > 0) {
-                localStorage.setItem('cart', JSON.stringify(serverCart.items));
-            }
+            // Merge local cart with server cart
+            const mergedCart = mergeCartItems(localCart, serverCart?.items || []);
+            await window.saveCart(mergedCart);
+            localStorage.setItem('cart', JSON.stringify(mergedCart));
+        } else if (serverCart?.items?.length > 0) {
+            localStorage.setItem('cart', JSON.stringify(serverCart.items));
         }
     } catch (error) {
         console.error('Error syncing cart:', error);
     }
+}
+
+function mergeCartItems(localItems, serverItems) {
+    const mergedItems = [...serverItems];
+    
+    localItems.forEach(localItem => {
+        const existingItem = mergedItems.find(item => item.id === localItem.id);
+        if (existingItem) {
+            existingItem.quantity += localItem.quantity;
+        } else {
+            mergedItems.push(localItem);
+        }
+    });
+    
+    return mergedItems;
 }

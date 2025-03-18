@@ -1,4 +1,5 @@
 import { showSuccess, showError } from './utils/toast.js';
+import Cookies from 'js-cookie';
 
 // Auth state management
 let currentUser = null;
@@ -10,6 +11,16 @@ async function initAuth() {
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4anF1emlhaXBzbHF0bWdxZW96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA0MjQzMTEsImV4cCI6MjA1NjAwMDMxMX0.iu4ovJ2QumGBROQOnbljQ9kPSirYvfgYiEukxJrHD3Q'
     );
     window.supabaseClient = supabaseClient;
+
+    // Check for existing session
+    const session = Cookies.get('supabase-session');
+    if (session) {
+        const { data: { user }, error } = await supabaseClient.auth.getUser(session);
+        if (!error && user) {
+            currentUser = user;
+            updateUIForAuthenticatedUser();
+        }
+    }
 
     setupFormHandlers();
 }
@@ -87,6 +98,9 @@ function setupLoginForm() {
             });
 
             if (error) throw error;
+
+            // Save session
+            Cookies.set('supabase-session', data.session.access_token, { expires: 7 });
 
             // Get user profile to check role
             const { data: profile } = await window.supabaseClient
