@@ -1,11 +1,14 @@
 import { showSuccess, showError } from './utils/toast.js';
+import Cookies from 'js-cookie';
+import { createUserMenu } from './components/userMenu.js';
 
 // Auth state management
 let currentUser = null;
+let supabaseClient = null;
 
 // Initialize authentication
 async function initAuth() {
-    const supabaseClient = window.supabase.createClient(
+    supabaseClient = window.supabase.createClient(
         'https://rxjquziaipslqtmgqeoz.supabase.co',
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4anF1emlhaXBzbHF0bWdxZW96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA0MjQzMTEsImV4cCI6MjA1NjAwMDMxMX0.iu4ovJ2QumGBROQOnbljQ9kPSirYvfgYiEukxJrHD3Q'
     );
@@ -17,11 +20,118 @@ async function initAuth() {
         const { data: { user }, error } = await supabaseClient.auth.getUser(session);
         if (!error && user) {
             currentUser = user;
-            updateUIForAuthenticatedUser();
+            await updateUIForAuthenticatedUser(user);
+        } else {
+            Cookies.remove('supabase-session');
+            updateUIForUnauthenticatedUser();
         }
     }
 
     setupFormHandlers();
+}
+
+async function updateUIForAuthenticatedUser(user) {
+    try {
+        const { data: profile } = await supabaseClient
+            .from('users')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+            
+        // Update navigation icons
+        const navIcons = document.querySelector('.nav-icons');
+        const userLink = navIcons?.querySelector('a[href="/iniciarsesion.html"]');
+        
+        if (userLink && profile) {
+            const userMenu = createUserMenu(profile);
+            userLink.replaceWith(userMenu);
+            
+            // Setup logout handler
+            const logoutBtn = userMenu.querySelector('#logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', async () => {
+                    try {
+                        const { error } = await supabaseClient.auth.signOut();
+                        if (!error) {
+                            Cookies.remove('supabase-session');
+                            window.location.href = '/';
+                        }
+                    } catch (error) {
+                        console.error('Error signing out:', error);
+                    }
+                });
+            }
+            
+            // Setup menu toggle
+            const menuTrigger = userMenu.querySelector('.user-menu-trigger');
+            if (menuTrigger) {
+                menuTrigger.addEventListener('click', () => {
+                    userMenu.classList.toggle('active');
+                });
+            }
+            
+            // Close menu when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!userMenu.contains(e.target)) {
+                    userMenu.classList.remove('active');
+                }
+            });
+        }
+        
+        // Sync cart with server
+        await syncCartWithServer();
+    } catch (error) {
+        console.error('Error updating UI for authenticated user:', error);
+    }
+}
+
+function updateUIForUnauthenticatedUser() {
+    try {
+        const navIcons = document.querySelector('.nav-icons');
+        const userMenu = navIcons?.querySelector('.user-menu');
+        
+        if (userMenu) {
+            const loginLink = document.createElement('a');
+            loginLink.href = '/iniciarsesion.html';
+            loginLink.innerHTML = '<i class="fas fa-user"></i>';
+            userMenu.replaceWith(loginLink);
+        }
+    } catch (error) {
+        console.error('Error updating UI for unauthenticated user:', error);
+    }
+}
+
+async function syncCartWithServer() {
+    try {
+        const localCart = JSON.parse(localStorage.getItem('cart')) || [];
+        const { data: serverCart } = await window.getCart();
+
+        if (localCart.length > 0) {
+            // Merge local cart with server cart
+            const mergedCart = mergeCartItems(localCart, serverCart?.items || []);
+            await window.saveCart(mergedCart);
+            localStorage.setItem('cart', JSON.stringify(mergedCart));
+        } else if (serverCart?.items?.length > 0) {
+            localStorage.setItem('cart', JSON.stringify(serverCart.items));
+        }
+    } catch (error) {
+        console.error('Error syncing cart:', error);
+    }
+}
+
+function mergeCartItems(localItems, serverItems) {
+    const mergedItems = [...serverItems];
+    
+    localItems.forEach(localItem => {
+        const existingItem = mergedItems.find(item => item.id === localItem.id);
+        if (existingItem) {
+            existingItem.quantity += localItem.quantity;
+        } else {
+            mergedItems.push(localItem);
+        }
+    });
+    
+    return mergedItems;
 }
 
 // Setup form handlers
@@ -91,7 +201,7 @@ function setupLoginForm() {
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Iniciando sesión...';
             submitBtn.disabled = true;
 
-            const { data, error } = await window.supabaseClient.auth.signInWithPassword({
+            const { data, error } = await supabaseClient.auth.signInWithPassword({
                 email,
                 password
             });
@@ -100,9 +210,10 @@ function setupLoginForm() {
 
             // Save session
             Cookies.set('supabase-session', data.session.access_token, { expires: 7 });
+            currentUser = data.user;
 
             // Get user profile to check role
-            const { data: profile } = await window.supabaseClient
+            const { data: profile } = await supabaseClient
                 .from('users')
                 .select('*')
                 .eq('id', data.user.id)
@@ -153,14 +264,14 @@ function setupRegisterForm() {
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creando cuenta...';
             submitBtn.disabled = true;
 
-            const { data: { user }, error: signUpError } = await window.supabaseClient.auth.signUp({
+            const { data: { user }, error: signUpError } = await supabaseClient.auth.signUp({
                 email,
                 password
             });
 
             if (signUpError) throw signUpError;
 
-            const { error: profileError } = await window.supabaseClient
+            const { error: profileError } = await supabaseClient
                 .from('users')
                 .insert([{
                     id: user.id,
