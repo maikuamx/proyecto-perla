@@ -8,7 +8,7 @@ window.initSupabase = async function() {
     if (!supabaseClient) {
         try {
             // Get Supabase configuration from server
-            const response = await fetch('/api/supabase-config');
+            const response = await fetch(`${API_URL}/supabase-config`);
             if (!response.ok) {
                 throw new Error('Failed to fetch Supabase config');
             }

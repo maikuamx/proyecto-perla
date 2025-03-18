@@ -1,4 +1,4 @@
-import { getProducts, getProductsByCategory } from './supabaaa.js';
+import { getProducts, getProductsByCategory } from './supabaa.js';
 import { showSuccess, showError } from './utils/toast.js';
 
 // Initialize catalog
