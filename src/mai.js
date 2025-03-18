@@ -1,4 +1,4 @@
-import { initAuthState } from './js/auth/authState.js';
+import { initAuthState } from './js/auth/authStat.js';
 import { getProducts } from './js/supaba.js';
 import { showSuccess, showError } from './js/utils/toast.js';
 
