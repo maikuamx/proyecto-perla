@@ -1,12 +1,14 @@
 // API URL for backend communication
 const API_URL = 'https://proyecto-perla.onrender.com/api';
+// Initialize Supabase client
+let supabaseClient = null;
 
 // Initialize Supabase client
 window.initSupabase = async function() {
-    if (!window.supabaseClient) {
+    if (!supabaseClient) {
         try {
             // Get Supabase configuration from server
-            const response = await fetch(`${API_URL}/supabase-config`);
+            const response = await fetch('/api/supabase-config');
             if (!response.ok) {
                 throw new Error('Failed to fetch Supabase config');
             }
@@ -16,19 +18,23 @@ window.initSupabase = async function() {
                 throw new Error('Invalid Supabase configuration');
             }
 
-            window.supabaseClient = window.supabase.createClient(url, anonKey);
+            supabaseClient = window.supabase.createClient(url, anonKey);
+            return supabaseClient;
         } catch (error) {
             console.error('Error initializing Supabase client:', error);
             return null;
         }
     }
-    return window.supabaseClient;
+    return supabaseClient;
 };
 
 // Product functions
 async function getProducts() {
     try {
-        const supabaseClient = await window.initSupabase();
+        if (!supabaseClient) {
+            supabaseClient = await window.initSupabase();
+        }
+        
         if (!supabaseClient) {
             throw new Error('Supabase client not initialized');
         }
@@ -48,7 +54,10 @@ async function getProducts() {
 
 async function getProductsByCategory(category) {
     try {
-        const supabaseClient = await window.initSupabase();
+        if (!supabaseClient) {
+            supabaseClient = await window.initSupabase();
+        }
+        
         if (!supabaseClient) {
             throw new Error('Supabase client not initialized');
         }
@@ -70,7 +79,10 @@ async function getProductsByCategory(category) {
 // Cart functions
 async function saveCart(items) {
     try {
-        const supabaseClient = await window.initSupabase();
+        if (!supabaseClient) {
+            supabaseClient = await window.initSupabase();
+        }
+        
         if (!supabaseClient) {
             throw new Error('Supabase client not initialized');
         }
@@ -98,7 +110,10 @@ async function saveCart(items) {
 
 async function getCart() {
     try {
-        const supabaseClient = await window.initSupabase();
+        if (!supabaseClient) {
+            supabaseClient = await window.initSupabase();
+        }
+        
         if (!supabaseClient) {
             throw new Error('Supabase client not initialized');
         }
