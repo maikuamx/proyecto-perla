@@ -20,7 +20,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Initialize Stripe with secret key from env
-const stripe = new Stripe(process.env.STRIPE_KEY_SECRET);
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Initialize Supabase client with environment variables
 const supabase = createClient(
@@ -37,11 +37,73 @@ app.use(express.json());
 app.use(express.static(join(__dirname, '../')));
 app.use('/src', express.static(join(__dirname, '../src')));
 
+// Stripe configuration endpoint
+app.get('/api/stripe-config', (req, res) => {
+  res.json({
+    publishableKey: process.env.STRIPE_PUBLISHABLE_KEY
+  });
+});
+
+// Create payment intent endpoint
+app.post('/api/create-payment-intent', async (req, res) => {
+  try {
+    const { amount, currency = 'usd' } = req.body;
+
+    // Create a PaymentIntent with the order amount and currency
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount,
+      currency,
+      automatic_payment_methods: {
+        enabled: true,
+      },
+    });
+
+    res.json({
+      clientSecret: paymentIntent.client_secret
+    });
+  } catch (error) {
+    console.error('Error creating payment intent:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Webhook endpoint for Stripe events
+app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+
+  try {
+    const event = stripe.webhooks.constructEvent(
+      req.body,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET
+    );
+
+    // Handle the event
+    switch (event.type) {
+      case 'payment_intent.succeeded':
+        const paymentIntent = event.data.object;
+        // Update order status in database
+        await handleSuccessfulPayment(paymentIntent);
+        break;
+      case 'payment_intent.payment_failed':
+        const failedPayment = event.data.object;
+        // Handle failed payment
+        await handleFailedPayment(failedPayment);
+        break;
+    }
+
+    res.json({ received: true });
+  } catch (error) {
+    console.error('Error handling webhook:', error);
+    res.status(400).send(`Webhook Error: ${error.message}`);
+  }
+});
+
 // Supabase config endpoint
 app.get('/api/supabase-config', (req, res) => {
   res.json({
     url: process.env.SUPABASE_URL,
-    anonKey: process.env.SUPABASE_SECRET
+    anonKey: process.env.SUPABASE_ANON_KEY
   });
 });
 
@@ -65,6 +127,41 @@ app.get('/iniciarsesion.html', (req, res) => {
 app.get('/admin.html', (req, res) => {
   res.sendFile(join(__dirname, '../admin.html'));
 });
+
+// Helper functions for payment handling
+async function handleSuccessfulPayment(paymentIntent) {
+  try {
+    const { data: order, error } = await supabase
+      .from('orders')
+      .update({ status: 'completed', payment_intent_id: paymentIntent.id })
+      .eq('payment_intent_id', paymentIntent.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    // Clear user's cart after successful payment
+    if (order.user_id) {
+      await supabase
+        .from('carts')
+        .delete()
+        .eq('user_id', order.user_id);
+    }
+  } catch (error) {
+    console.error('Error handling successful payment:', error);
+  }
+}
+
+async function handleFailedPayment(paymentIntent) {
+  try {
+    await supabase
+      .from('orders')
+      .update({ status: 'failed' })
+      .eq('payment_intent_id', paymentIntent.id);
+  } catch (error) {
+    console.error('Error handling failed payment:', error);
+  }
+}
 
 // Start server
 app.listen(port, () => {
