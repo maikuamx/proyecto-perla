@@ -4,6 +4,10 @@ const API_URL = 'https://proyecto-perla.onrender.com/api';
 // Initialize Supabase client
 let supabaseClient = null;
 
+// Session timeout in milliseconds (30 minutes)
+const SESSION_TIMEOUT = 30 * 60 * 1000;
+let sessionTimer;
+
 // Load Supabase script dynamically
 async function loadSupabaseScript() {
     return new Promise((resolve, reject) => {
@@ -25,15 +29,12 @@ async function loadSupabaseScript() {
 window.initSupabase = async function() {
     if (!supabaseClient) {
         try {
-            // Ensure Supabase script is loaded
             await loadSupabaseScript();
             
-            // Wait for window.supabase to be available
             if (!window.supabase) {
                 throw new Error('Supabase not available');
             }
 
-            // Get Supabase configuration from server
             const response = await fetch(`${API_URL}/supabase-config`);
             if (!response.ok) {
                 throw new Error('Failed to fetch Supabase config');
@@ -78,10 +79,16 @@ async function initAuthState() {
 
                 // Update UI for authenticated user
                 await updateUIForAuthenticatedUser(profile);
+                
+                // Start session timeout
+                resetSessionTimer();
+                
+                // Add activity listeners
+                setupActivityListeners();
             }
         } else {
             // If not authenticated and trying to access protected pages
-            const protectedPages = ['/perfil.html', '/pedidos.html', '/direcciones.html'];
+            const protectedPages = ['/perfil.html', '/pedidos.html', '/direcciones.html', '/admin.html'];
             if (protectedPages.includes(window.location.pathname)) {
                 window.location.href = '/iniciarsesion.html';
                 return;
@@ -97,6 +104,43 @@ async function initAuthState() {
     }
 }
 
+function setupActivityListeners() {
+    const events = ['mousedown', 'keydown', 'scroll', 'touchstart'];
+    events.forEach(event => {
+        document.addEventListener(event, resetSessionTimer);
+    });
+}
+
+function resetSessionTimer() {
+    clearTimeout(sessionTimer);
+    sessionTimer = setTimeout(handleSessionTimeout, SESSION_TIMEOUT);
+}
+
+async function handleSessionTimeout() {
+    try {
+        await supabaseClient.auth.signOut();
+        showSessionExpiredNotification();
+    } catch (error) {
+        console.error('Error handling session timeout:', error);
+    }
+}
+
+function showSessionExpiredNotification() {
+    const notification = document.createElement('div');
+    notification.className = 'session-expired-notification';
+    notification.innerHTML = `
+        <div class="notification-content">
+            <i class="fas fa-clock"></i>
+            <h3>Sesión Expirada</h3>
+            <p>Tu sesión ha expirado por inactividad.</p>
+            <button onclick="window.location.href='/iniciarsesion.html'">
+                Iniciar Sesión
+            </button>
+        </div>
+    `;
+    document.body.appendChild(notification);
+}
+
 async function handleAuthStateChange(event, session) {
     if (event === 'SIGNED_IN') {
         const { data: profile } = await supabaseClient
@@ -107,9 +151,12 @@ async function handleAuthStateChange(event, session) {
 
         if (profile) {
             await updateUIForAuthenticatedUser(profile);
+            resetSessionTimer();
+            setupActivityListeners();
         }
     } else if (event === 'SIGNED_OUT') {
         updateUIForUnauthenticatedUser();
+        clearTimeout(sessionTimer);
         if (window.location.pathname !== '/' && window.location.pathname !== '/iniciarsesion.html') {
             window.location.href = '/';
         }

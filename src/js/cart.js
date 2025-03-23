@@ -34,7 +34,7 @@ async function initializeStripe() {
 }
 
 async function createPaymentIntent() {
-    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const cart = await getValidatedCart();
     const total = calculateTotal(cart);
 
     const response = await fetch(`${API_URL}/create-payment-intent`, {
@@ -61,7 +61,7 @@ function calculateTotal(cart) {
 
 // Cart functionality
 document.addEventListener('DOMContentLoaded', async () => {
-    loadCart();
+    await loadCart();
     await initializeStripe();
     
     // Event delegation for cart item actions
@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function handlePayment(e) {
     e.preventDefault();
     
-    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const cart = await getValidatedCart();
     if (cart.length === 0) {
         showError('Tu carrito está vacío');
         return;
@@ -117,8 +117,84 @@ async function handlePayment(e) {
     }
 }
 
+async function getValidatedCart() {
+    try {
+        const supabase = await window.initSupabase();
+        if (!supabase) throw new Error('No se pudo inicializar Supabase');
+
+        // Get current cart
+        const { data: { user } } = await supabase.auth.getUser();
+        let cart;
+        
+        if (user) {
+            const { data } = await supabase
+                .from('carts')
+                .select('items')
+                .eq('user_id', user.id)
+                .single();
+            cart = data?.items || [];
+        } else {
+            cart = JSON.parse(localStorage.getItem('cart')) || [];
+        }
+
+        // Validate each item against current stock
+        const validatedCart = [];
+        let cartChanged = false;
+
+        for (const item of cart) {
+            const { data: product } = await supabase
+                .from('products')
+                .select('stock_quantity, price')
+                .eq('id', item.id)
+                .single();
+
+            if (!product) {
+                showError(`El producto "${item.name}" ya no está disponible`);
+                cartChanged = true;
+                continue;
+            }
+
+            if (product.stock_quantity === 0) {
+                showError(`El producto "${item.name}" está agotado`);
+                cartChanged = true;
+                continue;
+            }
+
+            if (item.quantity > product.stock_quantity) {
+                item.quantity = product.stock_quantity;
+                showWarning(`Solo hay ${product.stock_quantity} unidades disponibles de "${item.name}"`);
+                cartChanged = true;
+            }
+
+            // Update price if it changed
+            if (item.price !== product.price) {
+                item.price = product.price;
+                cartChanged = true;
+            }
+
+            validatedCart.push(item);
+        }
+
+        // Update cart if it changed
+        if (cartChanged) {
+            if (user) {
+                await supabase
+                    .from('carts')
+                    .upsert({ user_id: user.id, items: validatedCart });
+            }
+            localStorage.setItem('cart', JSON.stringify(validatedCart));
+        }
+
+        return validatedCart;
+    } catch (error) {
+        console.error('Error validating cart:', error);
+        showError('Error al validar el carrito');
+        return [];
+    }
+}
+
 async function loadCart() {
-    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const cart = await getValidatedCart();
     const cartItemsContainer = document.getElementById('cartItems');
     const cartEmptyMessage = document.getElementById('cartEmpty');
     const cartSummary = document.getElementById('cartSummary');
@@ -192,22 +268,26 @@ function updateCartSummary(cart) {
 
 async function updateItemQuantity(itemId, change) {
     try {
-        const cart = JSON.parse(localStorage.getItem('cart')) || [];
-        const itemIndex = cart.findIndex(item => item.id === itemId);
-        
-        if (itemIndex === -1) return;
-        
-        // Get current stock from database
-        const { data: product } = await window.supabaseClient
+        const supabase = await window.initSupabase();
+        if (!supabase) throw new Error('No se pudo inicializar Supabase');
+
+        // Get current stock
+        const { data: product } = await supabase
             .from('products')
             .select('stock_quantity')
             .eq('id', itemId)
             .single();
-            
+
         if (!product) {
             showError('Producto no encontrado');
             return;
         }
+
+        // Get current cart
+        const cart = await getValidatedCart();
+        const itemIndex = cart.findIndex(item => item.id === itemId);
+        
+        if (itemIndex === -1) return;
         
         const newQuantity = cart[itemIndex].quantity + change;
         
@@ -224,9 +304,16 @@ async function updateItemQuantity(itemId, change) {
             showSuccess('Cantidad actualizada');
         }
         
+        // Update cart in storage
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+            await supabase
+                .from('carts')
+                .upsert({ user_id: user.id, items: cart });
+        }
         localStorage.setItem('cart', JSON.stringify(cart));
-        await window.saveCart(cart);
-        loadCart();
+        
+        await loadCart();
     } catch (error) {
         console.error('Error updating quantity:', error);
         showError('Error al actualizar la cantidad');
@@ -235,13 +322,23 @@ async function updateItemQuantity(itemId, change) {
 
 async function removeItem(itemId) {
     try {
-        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const supabase = await window.initSupabase();
+        if (!supabase) throw new Error('No se pudo inicializar Supabase');
+
+        const cart = await getValidatedCart();
         const updatedCart = cart.filter(item => item.id !== itemId);
         
+        // Update cart in storage
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+            await supabase
+                .from('carts')
+                .upsert({ user_id: user.id, items: updatedCart });
+        }
         localStorage.setItem('cart', JSON.stringify(updatedCart));
-        await window.saveCart(updatedCart);
+        
         showInfo('Producto eliminado del carrito');
-        loadCart();
+        await loadCart();
     } catch (error) {
         console.error('Error removing item:', error);
         showError('Error al eliminar el producto');
