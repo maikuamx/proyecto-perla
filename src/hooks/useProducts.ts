@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { getSupabaseClient } from '../lib/supabase'
-import type { Product, ProductFilters } from '../types/product'
+import type { Product, ProductCategory, ProductFilters } from '../types/product'
 
 export function useProducts(filters?: ProductFilters) {
   return useQuery<Product[]>({

@@ -18,7 +18,7 @@ const sortOptions = [
 
 export default function Catalog() {
   const [filters, setFilters] = useState<ProductFilters>({})
-  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false)
+  const [, setIsMobileFiltersOpen] = useState(false)
 
   useEffect(() => {
     document.title = 'Catálogo - Sapphirus'
