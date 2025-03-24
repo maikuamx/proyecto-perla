@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --white: #FFFFFF;              /* Base para un look limpio y profesional */
+  --dark: #1A1A1A;              /* Negro suave para textos principales */
+  --gray-light: #F5F5F5;        /* Fondos sutiles */
+  --gray-medium: #B0B0B0;       /* Detalles y separadores */
+  --beige: #E6DDC4;             /* Toque sofisticado */
+  --blue-gray: #708090;         /* Color neutro para confianza */
+  --text-color: var(--dark);
+  --text-light: var(--gray-medium);
+  --transition: all 0.3s ease;
+  
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-full: 9999px;
+  
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  
+  --header-height: 70px;
+  --footer-height: 250px;
+  --transition: all 0.3s ease;
+  font-family: 'Poppins', Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--gray-light);
+  color: var(--text-color);
+  line-height: 1.5;
+}
