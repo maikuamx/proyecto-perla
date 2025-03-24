@@ -9,6 +9,8 @@ interface SignInCredentials {
   password: string
 }
 
+// nota
+
 interface SignUpCredentials extends SignInCredentials {
   firstName: string
   lastName: string
