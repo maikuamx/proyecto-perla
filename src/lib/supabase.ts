@@ -31,7 +31,8 @@ export async function initSupabase() {
       auth: {
         persistSession: true,
         autoRefreshToken: true,
-        detectSessionInUrl: true
+        detectSessionInUrl: true,
+        storage: window.localStorage
       }
     })
 

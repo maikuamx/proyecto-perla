@@ -4,7 +4,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getSupabaseClient } from '../lib/supabase'
 import type { User } from '../types/user'
 import toast from 'react-hot-toast'
-
 interface SignInCredentials {
   email: string
   password: string
@@ -24,13 +23,13 @@ export function useAuth() {
     queryKey: ['user'],
     queryFn: async () => {
       try {
-        const { data: { user: authUser } } = await supabase.auth.getUser()
-        if (!authUser) return null
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!session?.user) return null
 
         const { data: profile } = await supabase
           .from('users')
           .select('*')
-          .eq('id', authUser.id)
+          .eq('id', session.user.id)
           .single()
 
         return profile
@@ -39,6 +38,8 @@ export function useAuth() {
         return null
       }
     },
+    staleTime: Infinity,
+    gcTime: Infinity,
     retry: false
   })
 
@@ -116,6 +117,7 @@ export function useAuth() {
     },
     onSuccess: () => {
       queryClient.setQueryData(['user'], null)
+      queryClient.clear()
       toast.success('¡Hasta pronto!')
       navigate('/')
     },
@@ -137,6 +139,7 @@ export function useAuth() {
           queryClient.setQueryData(['user'], profile)
         } else if (event === 'SIGNED_OUT') {
           queryClient.setQueryData(['user'], null)
+          queryClient.clear()
         }
       }
     )
