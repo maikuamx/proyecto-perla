@@ -2,10 +2,11 @@
   "name": "proyecto-perla",
   "private": true,
   "version": "0.0.0",
+  "homepage": "https://github.com/maikuamx/proyecto-perla.git",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "predeploy": "npm run dev",
+    "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
