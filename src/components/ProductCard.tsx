@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
-import { FiShoppingCart, FiEye } from 'react-icons/fi'
+import { FiShoppingCart, FiEye, FiEdit2 } from 'react-icons/fi'
 import type { Product } from '../types/product'
+import { useAuth } from '../hooks/useAuth'
 
 interface ProductCardProps {
   product: Product
@@ -10,6 +11,9 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, onAddToCart, onQuickView, onImageClick }: ProductCardProps) {
+  const { user } = useAuth()
+  const isAdmin = user?.role === 'admin'
+
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden transition-transform hover:-translate-y-1">
       <div 
@@ -46,14 +50,24 @@ export default function ProductCard({ product, onAddToCart, onQuickView, onImage
         </div>
 
         <div className="mt-4 flex gap-2">
-          <button
-            onClick={() => onAddToCart(product)}
-            disabled={product.stock_quantity === 0}
-            className="flex-1 flex items-center justify-center gap-2 bg-primary text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <FiShoppingCart className="h-4 w-4" />
-            {product.stock_quantity === 0 ? 'Agotado' : 'Añadir'}
-          </button>
+          {isAdmin ? (
+            <Link
+              to="/admin"
+              className="flex-1 flex items-center justify-center gap-2 bg-primary text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-secondary transition-colors"
+            >
+              <FiEdit2 className="h-4 w-4" />
+              Editar Producto
+            </Link>
+          ) : (
+            <button
+              onClick={() => onAddToCart(product)}
+              disabled={product.stock_quantity === 0}
+              className="flex-1 flex items-center justify-center gap-2 bg-primary text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <FiShoppingCart className="h-4 w-4" />
+              {product.stock_quantity === 0 ? 'Agotado' : 'Añadir'}
+            </button>
+          )}
           
           <button
             onClick={() => onQuickView(product)}

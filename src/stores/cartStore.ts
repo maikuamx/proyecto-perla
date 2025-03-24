@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { Cart, CartItem } from '../types/cart'
+import toast from 'react-hot-toast'
 
 interface CartStore {
   cart: Cart
@@ -31,6 +32,7 @@ export const useCartStore = create<CartStore>()(
               : i
           )
           
+          toast.success('Cantidad actualizada en el carrito')
           return {
             cart: {
               items: updatedItems,
@@ -43,6 +45,7 @@ export const useCartStore = create<CartStore>()(
         const newItem = { ...item, quantity: 1 }
         const updatedItems = [...state.cart.items, newItem]
         
+        toast.success('Producto añadido al carrito')
         return {
           cart: {
             items: updatedItems,
@@ -55,6 +58,7 @@ export const useCartStore = create<CartStore>()(
       removeItem: (itemId) => set((state) => {
         const updatedItems = state.cart.items.filter((i) => i.id !== itemId)
         
+        toast.success('Producto eliminado del carrito')
         return {
           cart: {
             items: updatedItems,
@@ -68,6 +72,7 @@ export const useCartStore = create<CartStore>()(
         if (quantity < 1) {
           const updatedItems = state.cart.items.filter((i) => i.id !== itemId)
           
+          toast.success('Producto eliminado del carrito')
           return {
             cart: {
               items: updatedItems,
@@ -81,6 +86,7 @@ export const useCartStore = create<CartStore>()(
           i.id === itemId ? { ...i, quantity } : i
         )
         
+        toast.success('Cantidad actualizada en el carrito')
         return {
           cart: {
             items: updatedItems,
@@ -90,7 +96,10 @@ export const useCartStore = create<CartStore>()(
         }
       }),
       
-      clearCart: () => set({ cart: initialState })
+      clearCart: () => {
+        toast.success('Carrito vaciado')
+        return set({ cart: initialState })
+      }
     }),
     {
       name: 'cart-storage'

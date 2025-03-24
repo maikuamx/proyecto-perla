@@ -1,5 +1,6 @@
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import toast from 'react-hot-toast'
 
 interface ProtectedRouteProps {
   children: React.ReactNode
@@ -19,10 +20,12 @@ export default function ProtectedRoute({ children, role }: ProtectedRouteProps) 
 
   if (!user) {
     localStorage.setItem('redirectAfterLogin', window.location.pathname)
+    toast.error('Debes iniciar sesión para acceder a esta página')
     return <Navigate to="/login" replace />
   }
 
   if (role && user.role !== role) {
+    toast.error('No tienes permisos para acceder a esta página')
     return <Navigate to="/" replace />
   }
 

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getSupabaseClient } from '../lib/supabase'
 import type { User } from '../types/user'
+import toast from 'react-hot-toast'
 
 interface SignInCredentials {
   email: string
@@ -59,6 +60,7 @@ export function useAuth() {
     },
     onSuccess: (profile) => {
       queryClient.setQueryData(['user'], profile)
+      toast.success('¡Bienvenido de nuevo!')
       if (profile.role === 'admin') {
         navigate('/admin')
       } else {
@@ -70,6 +72,9 @@ export function useAuth() {
           navigate('/')
         }
       }
+    },
+    onError: (error) => {
+      toast.error('Error al iniciar sesión: ' + error.message)
     }
   })
 
@@ -96,7 +101,11 @@ export function useAuth() {
       if (profileError) throw profileError
     },
     onSuccess: () => {
+      toast.success('¡Cuenta creada exitosamente!')
       navigate('/')
+    },
+    onError: (error) => {
+      toast.error('Error al crear la cuenta: ' + error.message)
     }
   })
 
@@ -107,7 +116,11 @@ export function useAuth() {
     },
     onSuccess: () => {
       queryClient.setQueryData(['user'], null)
+      toast.success('¡Hasta pronto!')
       navigate('/')
+    },
+    onError: (error) => {
+      toast.error('Error al cerrar sesión: ' + error.message)
     }
   })
 
