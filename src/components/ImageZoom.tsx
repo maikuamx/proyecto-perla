@@ -32,7 +32,7 @@ export default function ImageZoom({ src, alt, onClose }: ImageZoomProps) {
   return (
     <div 
       ref={containerRef}
-      className="fixed inset-0 z-50 bg-black bg-opacity-75 flex items-center justify-center"
+      className="fixed inset-0 z-50 bg-black bg-opacity-75 flex items-center justify-center p-4"
       onClick={handleBackdropClick}
     >
       <button
@@ -45,11 +45,11 @@ export default function ImageZoom({ src, alt, onClose }: ImageZoomProps) {
         <FiX className="h-6 w-6" />
       </button>
 
-      <div className="relative max-w-[90%] max-h-[90%]">
+      <div className="relative max-w-3xl w-full bg-white rounded-lg overflow-hidden">
         <img
           src={src}
           alt={alt}
-          className="w-full h-full object-contain"
+          className="w-full h-auto"
           draggable={false}
         />
       </div>

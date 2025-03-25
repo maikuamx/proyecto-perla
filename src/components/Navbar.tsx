@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom'
 import { FiMenu, FiSearch, FiUser, FiShoppingBag } from 'react-icons/fi'
 import { useAuth } from '../hooks/useAuth'
 import UserMenu from './UserMenu'
+import { useCartStore } from '../stores/cartStore'
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { user, isLoading } = useAuth()
+  const { cart } = useCartStore()
 
   return (
     <nav className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50">
@@ -22,8 +24,8 @@ export default function Navbar() {
             </button>
             <Link to="/" className="flex-shrink-0 flex items-center">
               <img
-                className="h-10 w-auto"
-                src="/logo-black.png"
+                className="h-8 w-auto"
+                src="/assets/logo-black.png"
                 alt="Sapphirus"
               />
             </Link>
@@ -78,15 +80,19 @@ export default function Navbar() {
                   <FiUser className="h-6 w-6" />
                 </Link>
               )}
-              <Link
-                to="/cart"
-                className="text-gray-600 hover:text-gray-900 relative"
-              >
-                <FiShoppingBag className="h-6 w-6" />
-                <span className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                  0
-                </span>
-              </Link>
+              {!user?.role || user.role !== 'admin' ? (
+                <Link
+                  to="/cart"
+                  className="text-gray-600 hover:text-gray-900 relative"
+                >
+                  <FiShoppingBag className="h-6 w-6" />
+                  {cart.itemCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-primary text-black text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                      {cart.itemCount}
+                    </span>
+                  )}
+                </Link>
+              ) : null}
             </div>
           </div>
         </div>

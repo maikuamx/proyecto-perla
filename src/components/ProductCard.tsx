@@ -25,6 +25,18 @@ export default function ProductCard({ product, onAddToCart, onQuickView, onImage
           alt={product.name}
           className="w-full h-full object-cover"
         />
+        {!isAdmin && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              onAddToCart(product)
+            }}
+            disabled={product.stock_quantity === 0}
+            className="absolute top-4 right-4 p-2 bg-blue-gray text-white rounded-full hover:bg-blue-gray/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <FiShoppingCart className="h-5 w-5" />
+          </button>
+        )}
       </div>
       
       <div className="p-4">
@@ -60,21 +72,13 @@ export default function ProductCard({ product, onAddToCart, onQuickView, onImage
             </Link>
           ) : (
             <button
-              onClick={() => onAddToCart(product)}
-              disabled={product.stock_quantity === 0}
-              className="flex-1 flex items-center justify-center gap-2 bg-primary text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => onQuickView(product)}
+              className="flex-1 flex items-center justify-center gap-2 bg-primary text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-secondary transition-colors"
             >
-              <FiShoppingCart className="h-4 w-4" />
-              {product.stock_quantity === 0 ? 'Agotado' : 'Añadir'}
+              <FiEye className="h-4 w-4" />
+              Ver detalles
             </button>
           )}
-          
-          <button
-            onClick={() => onQuickView(product)}
-            className="flex items-center justify-center w-10 h-10 bg-gray-100 text-gray-600 rounded-full hover:bg-gray-200 transition-colors"
-          >
-            <FiEye className="h-5 w-5" />
-          </button>
         </div>
       </div>
     </div>

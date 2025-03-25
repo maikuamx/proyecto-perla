@@ -139,7 +139,7 @@ export default function Cart() {
 
                 <button
                   onClick={() => {/* TODO: Implement checkout */}}
-                  className="w-full bg-primary text-white px-6 py-3 rounded-full hover:bg-secondary transition-colors"
+                  className="w-full bg-blue-gray text-white px-6 py-3 rounded-full hover:bg-dark transition-colors"
                 >
                   Proceder al pago
                 </button>
