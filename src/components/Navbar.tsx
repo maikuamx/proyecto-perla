@@ -25,7 +25,7 @@ export default function Navbar() {
             <Link to="/" className="flex-shrink-0 flex items-center">
               <img
                 className="h-8 w-auto"
-                src="/assets/logo-black.png"
+                src="/logo-black.png"
                 alt="Sapphirus"
               />
             </Link>

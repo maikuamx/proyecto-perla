@@ -26,16 +26,14 @@ export default function CheckoutForm({ onSuccess, onCancel }: CheckoutFormProps)
 
     setIsProcessing(true)
 
-    const { error } = await stripe.confirmPayment({
+    const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
-      confirmParams: {
-        return_url: `${window.location.origin}/orders`
-      }
+      redirect: 'if_required'
     })
 
     if (error) {
       setMessage(error.message || 'Error al procesar el pago')
-    } else {
+    } else if (paymentIntent && paymentIntent.status === 'succeeded') {
       onSuccess()
     }
 
