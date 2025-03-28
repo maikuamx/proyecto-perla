@@ -4,14 +4,18 @@ import { usePayment } from '../hooks/usePayment'
 import { getStripe } from '../lib/stripe'
 import CheckoutForm from './CheckoutForm'
 import { Stripe } from '@stripe/stripe-js'
+import type { CartItem } from '../types/cart'
+
 
 interface PaymentFormProps {
   amount: number
   onSuccess: () => void
   onCancel: () => void
+  items: CartItem[]
+  total: number
 }
 
-export default function PaymentForm({ amount, onSuccess, onCancel }: PaymentFormProps) {
+export default function PaymentForm({ amount, onSuccess, onCancel, items, total }: PaymentFormProps) {
   const { createPayment, isLoading, error } = usePayment()
   const [stripe, setStripe] = useState<Stripe | null>(null)
   const [clientSecret, setClientSecret] = useState<string | null>(null)
@@ -21,18 +25,22 @@ export default function PaymentForm({ amount, onSuccess, onCancel }: PaymentForm
   }, [])
 
   useEffect(() => {
-    if (amount && !clientSecret) {
-      const fetchPayment = async () => {
-        try {
-          const response = await createPayment({ amount: Math.round(amount * 100) })
-          setClientSecret(response.clientSecret)
-        } catch (err) {
-          console.error('Error creating payment:', err)
-        }
+    const fetchPayment = async () => {
+      try {
+        const response = await createPayment({ 
+          amount: Math.round(amount * 100),
+          currency: 'mxn'
+        })
+        setClientSecret(response.clientSecret)
+      } catch (err) {
+        console.error('Error creating payment:', err)
       }
+    }
+
+    if (amount > 0) {
       fetchPayment()
     }
-  }, [amount, createPayment, clientSecret])
+  }, [amount, createPayment])
 
   if (isLoading || !stripe || !clientSecret) {
     return (
@@ -66,7 +74,12 @@ export default function PaymentForm({ amount, onSuccess, onCancel }: PaymentForm
         }
       }
     }}>
-      <CheckoutForm onSuccess={onSuccess} onCancel={onCancel} />
+      <CheckoutForm 
+        onSuccess={onSuccess} 
+        onCancel={onCancel} 
+        items={items}
+        total={total}
+      />
     </Elements>
   )
 }

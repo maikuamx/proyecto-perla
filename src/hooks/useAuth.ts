@@ -4,12 +4,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getSupabaseClient } from '../lib/supabase'
 import type { User } from '../types/user'
 import toast from 'react-hot-toast'
+
 interface SignInCredentials {
   email: string
   password: string
 }
-
-// nota
 
 interface SignUpCredentials extends SignInCredentials {
   firstName: string
@@ -28,21 +27,27 @@ export function useAuth() {
         const { data: { session } } = await supabase.auth.getSession()
         if (!session?.user) return null
 
-        const { data: profile } = await supabase
+        const { data: profile, error } = await supabase
           .from('users')
           .select('*')
           .eq('id', session.user.id)
           .single()
 
+        if (error) {
+          console.error('Error fetching user profile:', error)
+          return null
+        }
+
         return profile
       } catch (error) {
-        console.error('Error fetching user:', error)
+        console.error('Error in auth check:', error)
         return null
       }
     },
-    staleTime: Infinity,
-    gcTime: Infinity,
-    retry: false
+    retry: 3,
+    retryDelay: 1000,
+    refetchOnMount: true,
+    refetchOnReconnect: true
   })
 
   const signIn = useMutation({
@@ -53,11 +58,13 @@ export function useAuth() {
       })
       if (error) throw error
 
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('users')
         .select('*')
         .eq('id', data.user.id)
         .single()
+
+      if (profileError) throw profileError
 
       return profile
     },

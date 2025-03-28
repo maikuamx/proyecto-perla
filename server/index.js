@@ -47,12 +47,12 @@ app.get('/api/stripe-config', (req, res) => {
 // Create payment intent endpoint
 app.post('/api/create-payment-intent', async (req, res) => {
   try {
-    const { amount, currency = 'usd' } = req.body;
+    const { amount } = req.body;
 
     // Create a PaymentIntent with the order amount and currency
     const paymentIntent = await stripe.paymentIntents.create({
       amount,
-      currency,
+      currency: 'mxn', // Set currency to Mexican Pesos
       automatic_payment_methods: {
         enabled: true,
       },
@@ -66,7 +66,6 @@ app.post('/api/create-payment-intent', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
 
 // Supabase config endpoint
 app.get('/api/supabase-config', (req, res) => {

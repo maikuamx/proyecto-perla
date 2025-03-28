@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { getSupabaseClient } from '../lib/supabase'
-import type { Product, ProductCategory, ProductFilters } from '../types/product'
+import type { Product, ProductFilters } from '../types/product'
 
 export function useProducts(filters?: ProductFilters) {
   return useQuery<Product[]>({
@@ -11,6 +11,7 @@ export function useProducts(filters?: ProductFilters) {
         let query = supabase
           .from('products')
           .select('*')
+          .gt('stock_quantity', 0) // Only fetch products with stock > 0
 
         if (filters?.category) {
           query = query.eq('category', filters.category)
@@ -37,7 +38,7 @@ export function useProducts(filters?: ProductFilters) {
         const { data, error } = await query
 
         if (error) {
-          console.error('Error fetching products:', error)
+          console.error('Supabase query error:', error)
           throw error
         }
 
@@ -45,13 +46,12 @@ export function useProducts(filters?: ProductFilters) {
           return []
         }
 
-        // Ensure all required fields are present
         return data.map(product => ({
           id: product.id,
           name: product.name,
           description: product.description,
           price: product.price,
-          category: product.category as ProductCategory,
+          category: product.category,
           size: product.size,
           stock_quantity: product.stock_quantity,
           images: Array.isArray(product.images) ? product.images : [],
@@ -63,8 +63,11 @@ export function useProducts(filters?: ProductFilters) {
         throw error
       }
     },
-    staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 3,
-    refetchOnWindowFocus: false
+    retryDelay: 1000,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
+    refetchOnReconnect: true
   })
 }

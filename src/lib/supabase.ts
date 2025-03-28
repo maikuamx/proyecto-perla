@@ -7,34 +7,52 @@ export async function initSupabase() {
   if (supabaseInstance) return supabaseInstance
 
   try {
-    // First try environment variables
-    let url = import.meta.env.VITE_SUPABASE_URL
-    let anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-
-    // If not available in env, fetch from API
-    if (!url || !anonKey) {
-      const response = await fetch('https://proyecto-perla.onrender.com/api/supabase-config')
-      if (!response.ok) {
-        throw new Error('Failed to fetch Supabase configuration')
-      }
-      
-      const config = await response.json()
-      url = config.url
-      anonKey = config.anonKey
+    // Fetch configuration from server first
+    const response = await fetch('https://proyecto-perla.onrender.com/api/supabase-config')
+    if (!response.ok) {
+      throw new Error('Failed to fetch Supabase configuration')
     }
     
+    const config = await response.json()
+    const url = config.url
+    const anonKey = config.anonKey
+
     if (!url || !anonKey) {
       throw new Error('Missing Supabase configuration')
     }
-
+    
     supabaseInstance = createClient<Database>(url, anonKey, {
       auth: {
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true,
         storage: window.localStorage
+      },
+      db: {
+        schema: 'public'
       }
     })
+
+    // Verify connection with retry logic
+    let retries = 3
+    while (retries > 0) {
+      try {
+        const { error } = await supabaseInstance.from('products').select('id').limit(1)
+        if (!error) {
+          break // Connection successful
+        }
+        throw error
+      } catch (error) {
+        retries--
+        if (retries === 0) {
+          console.error('Error verifying Supabase connection:', error)
+          supabaseInstance = null
+          throw error
+        }
+        // Wait before retrying
+        await new Promise(resolve => setTimeout(resolve, 1000))
+      }
+    }
 
     return supabaseInstance
   } catch (error) {

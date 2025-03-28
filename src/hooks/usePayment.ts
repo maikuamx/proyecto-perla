@@ -7,7 +7,7 @@ interface PaymentResponse {
 
 export function usePayment() {
   const createPayment = useMutation<PaymentResponse, Error, { amount: number; currency?: string }>({
-    mutationFn: async ({ amount, currency = 'usd' }) => {
+    mutationFn: async ({ amount, currency = 'mxn' }) => {
       const response = await createPaymentIntent(amount, currency)
       return response
     }

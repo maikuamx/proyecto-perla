@@ -1,14 +1,25 @@
-import { useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { FiTrash2, FiMinus, FiPlus, FiArrowLeft } from 'react-icons/fi'
 import { useCartStore } from '../stores/cartStore'
+import PaymentModal from '../components/PaymentModal'
+import toast from 'react-hot-toast'
 
 export default function Cart() {
-  const { cart, updateQuantity, removeItem } = useCartStore()
+  const navigate = useNavigate()
+  const { cart, updateQuantity, removeItem, clearCart } = useCartStore()
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
 
   useEffect(() => {
     document.title = 'Carrito - Sapphirus'
   }, [])
+
+  const handlePaymentSuccess = () => {
+    clearCart()
+    setIsPaymentModalOpen(false)
+    toast.success('¡Pago realizado con éxito!')
+    navigate('/orders')
+  }
 
   if (cart.items.length === 0) {
     return (
@@ -66,14 +77,20 @@ export default function Cart() {
 
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                      onClick={() => {
+                        updateQuantity(item.id, item.quantity - 1)
+                        toast.success('Cantidad actualizada')
+                      }}
                       className="p-1 text-gray-500 hover:text-gray-700"
                     >
                       <FiMinus className="h-4 w-4" />
                     </button>
                     <span className="w-8 text-center">{item.quantity}</span>
                     <button
-                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                      onClick={() => {
+                        updateQuantity(item.id, item.quantity + 1)
+                        toast.success('Cantidad actualizada')
+                      }}
                       className="p-1 text-gray-500 hover:text-gray-700"
                     >
                       <FiPlus className="h-4 w-4" />
@@ -81,7 +98,10 @@ export default function Cart() {
                   </div>
 
                   <button
-                    onClick={() => removeItem(item.id)}
+                    onClick={() => {
+                      removeItem(item.id)
+                      toast.success('Producto eliminado del carrito')
+                    }}
                     className="p-2 text-gray-400 hover:text-red-500"
                   >
                     <FiTrash2 className="h-5 w-5" />
@@ -108,37 +128,12 @@ export default function Cart() {
 
               <div className="space-y-4">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Subtotal</span>
+                  <span className="text-gray-500">Total</span>
                   <span className="text-gray-900">${cart.total.toFixed(2)}</span>
                 </div>
 
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Envío</span>
-                  <span className="text-gray-900">
-                    {cart.total > 50 ? 'Gratis' : '$4.99'}
-                  </span>
-                </div>
-
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Impuestos</span>
-                  <span className="text-gray-900">
-                    ${(cart.total * 0.16).toFixed(2)}
-                  </span>
-                </div>
-
-                <div className="border-t border-gray-200 pt-4">
-                  <div className="flex justify-between">
-                    <span className="text-base font-medium text-gray-900">
-                      Total
-                    </span>
-                    <span className="text-base font-medium text-gray-900">
-                      ${(cart.total + (cart.total > 50 ? 0 : 4.99) + cart.total * 0.16).toFixed(2)}
-                    </span>
-                  </div>
-                </div>
-
                 <button
-                  onClick={() => {/* TODO: Implement checkout */}}
+                  onClick={() => setIsPaymentModalOpen(true)}
                   className="w-full bg-blue-gray text-white px-6 py-3 rounded-full hover:bg-dark transition-colors"
                 >
                   Proceder al pago
@@ -148,6 +143,14 @@ export default function Cart() {
           </div>
         </div>
       </div>
+
+      <PaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        amount={cart.total}
+        onSuccess={handlePaymentSuccess}
+        items={cart.items}
+      />
     </div>
   )
 }

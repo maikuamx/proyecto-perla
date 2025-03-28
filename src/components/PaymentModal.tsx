@@ -2,15 +2,17 @@ import { Dialog, Transition } from '@headlessui/react'
 import { Fragment } from 'react'
 import { FiX } from 'react-icons/fi'
 import PaymentForm from './PaymentForm'
+import type { CartItem } from '../types/cart'
 
 interface PaymentModalProps {
   isOpen: boolean
   onClose: () => void
   amount: number
   onSuccess: () => void
+  items: CartItem[]
 }
 
-export default function PaymentModal({ isOpen, onClose, amount, onSuccess }: PaymentModalProps) {
+export default function PaymentModal({ isOpen, onClose, amount, onSuccess, items }: PaymentModalProps) {
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
@@ -55,6 +57,8 @@ export default function PaymentModal({ isOpen, onClose, amount, onSuccess }: Pay
                   amount={amount}
                   onSuccess={onSuccess}
                   onCancel={onClose}
+                  items={items}
+                  total={amount}
                 />
               </Dialog.Panel>
             </Transition.Child>

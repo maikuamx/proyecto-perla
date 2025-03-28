@@ -14,6 +14,12 @@ export default function ProductCard({ product, onAddToCart, onQuickView, onImage
   const { user } = useAuth()
   const isAdmin = user?.role === 'admin'
 
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    await onAddToCart(product)
+  }
+
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden transition-transform hover:-translate-y-1">
       <div 
@@ -25,14 +31,10 @@ export default function ProductCard({ product, onAddToCart, onQuickView, onImage
           alt={product.name}
           className="w-full h-full object-cover"
         />
-        {!isAdmin && (
+        {!isAdmin && product.stock_quantity > 0 && (
           <button
-            onClick={(e) => {
-              e.stopPropagation()
-              onAddToCart(product)
-            }}
-            disabled={product.stock_quantity === 0}
-            className="absolute top-4 right-4 p-2 bg-blue-gray text-white rounded-full hover:bg-blue-gray/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={handleAddToCart}
+            className="absolute top-4 right-4 p-2 bg-blue-gray text-white rounded-full hover:bg-blue-gray/90 transition-colors"
           >
             <FiShoppingCart className="h-5 w-5" />
           </button>
@@ -54,11 +56,16 @@ export default function ProductCard({ product, onAddToCart, onQuickView, onImage
           <span className="text-lg font-semibold text-primary">
             ${product.price.toFixed(2)}
           </span>
-          {product.size && (
-            <span className="text-sm text-gray-500">
-              Talla: {product.size}
+          <div className="flex items-center gap-2">
+            {product.size && (
+              <span className="text-sm text-gray-500">
+                Talla: {product.size}
+              </span>
+            )}
+            <span className={`text-sm ${product.stock_quantity > 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {product.stock_quantity > 0 ? `Stock: ${product.stock_quantity}` : 'Sin stock'}
             </span>
-          )}
+          </div>
         </div>
 
         <div className="mt-4 flex gap-2">

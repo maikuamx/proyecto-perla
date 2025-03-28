@@ -8,7 +8,7 @@ export async function getStripeConfig() {
   return response.json()
 }
 
-export async function createPaymentIntent(amount: number, currency: string = 'usd') {
+export async function createPaymentIntent(amount: number, currency: string = 'mxn') {
   const response = await fetch(`${API_URL}/create-payment-intent`, {
     method: 'POST',
     headers: {
