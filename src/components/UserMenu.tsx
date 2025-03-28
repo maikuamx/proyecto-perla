@@ -1,8 +1,9 @@
 import { useState, useRef } from 'react'
-import { Link } from 'react-router-dom'
-import { FiUser, FiShoppingBag, FiLogOut, FiSettings } from 'react-icons/fi'
+import { Link, useNavigate } from 'react-router-dom'
+import { FiUser, FiShoppingBag, FiMapPin, FiLogOut, FiSettings } from 'react-icons/fi'
 import { useAuth } from '../hooks/useAuth'
 import { useOnClickOutside } from '../hooks/useOnClickOutside'
+import { useCartStore } from '../stores/cartStore'
 import type { User } from '../types/user'
 
 interface UserMenuProps {
@@ -13,13 +14,21 @@ export default function UserMenu({ user }: UserMenuProps) {
   const [isOpen, setIsOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const { signOut } = useAuth()
+  const navigate = useNavigate()
+  const clearCart = useCartStore(state => state.clearCart)
   const isAdmin = user.role === 'admin'
 
   useOnClickOutside<HTMLDivElement>(menuRef, () => setIsOpen(false))
 
   const handleSignOut = async () => {
-    await signOut()
-    setIsOpen(false)
+    try {
+      await signOut()
+      clearCart()
+      setIsOpen(false)
+      navigate('/')
+    } catch (error) {
+      console.error('Error signing out:', error)
+    }
   }
 
   return (
@@ -47,7 +56,7 @@ export default function UserMenu({ user }: UserMenuProps) {
             <>
               <Link
                 to="/admin"
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 items-center"
+                className=" px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                 onClick={() => setIsOpen(false)}
               >
                 <FiSettings className="mr-2 h-4 w-4" />
@@ -58,7 +67,7 @@ export default function UserMenu({ user }: UserMenuProps) {
             <>
               <Link
                 to="/profile"
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 items-center"
+                className=" px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                 onClick={() => setIsOpen(false)}
               >
                 <FiUser className="mr-2 h-4 w-4" />
@@ -67,18 +76,27 @@ export default function UserMenu({ user }: UserMenuProps) {
 
               <Link
                 to="/orders"
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 items-center"
+                className=" px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
                 onClick={() => setIsOpen(false)}
               >
                 <FiShoppingBag className="mr-2 h-4 w-4" />
                 Mis Pedidos
+              </Link>
+
+              <Link
+                to="/addresses"
+                className=" px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                onClick={() => setIsOpen(false)}
+              >
+                <FiMapPin className="mr-2 h-4 w-4" />
+                Mis Direcciones
               </Link>
             </>
           )}
 
           <button
             onClick={handleSignOut}
-            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 items-center"
+            className=" w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
           >
             <FiLogOut className="mr-2 h-4 w-4" />
             Cerrar Sesión

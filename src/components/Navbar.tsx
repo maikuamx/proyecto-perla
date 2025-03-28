@@ -4,6 +4,7 @@ import { FiMenu, FiSearch, FiUser, FiShoppingBag } from 'react-icons/fi'
 import { useAuth } from '../hooks/useAuth'
 import UserMenu from './UserMenu'
 import { useCartStore } from '../stores/cartStore'
+import CartCount from './CartCount'
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -25,7 +26,7 @@ export default function Navbar() {
             <Link to="/" className="flex-shrink-0 flex items-center">
               <img
                 className="h-8 w-auto"
-                src="/logo-black.png"
+                src="/assets/logo-black.png"
                 alt="Sapphirus"
               />
             </Link>
@@ -41,18 +42,6 @@ export default function Navbar() {
                 className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium"
               >
                 Catálogo
-              </Link>
-              <Link
-                to="/contacto"
-                className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium"
-              >
-                Contacto
-              </Link>
-              <Link
-                to="/faqs"
-                className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium"
-              >
-                Preguntas frecuentes
               </Link>
             </div>
           </div>
@@ -86,11 +75,7 @@ export default function Navbar() {
                   className="text-gray-600 hover:text-gray-900 relative"
                 >
                   <FiShoppingBag className="h-6 w-6" />
-                  {cart.itemCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-primary text-black text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                      {cart.itemCount}
-                    </span>
-                  )}
+                  {cart.itemCount > 0 && <CartCount />}
                 </Link>
               ) : null}
             </div>
@@ -112,18 +97,6 @@ export default function Navbar() {
             className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
           >
             Catálogo
-          </Link>
-          <Link
-            to="/contacto"
-            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-          >
-            Contacto
-          </Link>
-          <Link
-            to="/faqs"
-            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-          >
-            Preguntas frecuentes
           </Link>
         </div>
       </div>
